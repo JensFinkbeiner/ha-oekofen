@@ -311,7 +311,7 @@ Remote: GitHub, öffentliches Repository (Name zum Beispiel `ha-oekofen`), Branc
      - 97 Tests grün, 100 % Coverage.
      - Testinstanz am echten Kessel: 40 Entitäten, Firmware V4.00b als Softwareversion, keine Fehler.
      - Alle Punkte aus dem Review von 0.3.0 erledigt.
-     - **Offen für die Abnahme:** Jens prüft den Diagnose-Download.
+     - **Abgenommen am 22.11.2026:** Jens hat den Diagnose-Download geprüft, er enthält weder IP noch Passwort.
 5. **0.5.0 Brenner-Statistik und Energie:** `burner.py`, Tageswerte mit Restore, Energie- und Pelletsensor mit Optionen.
    - Abnahme: Tests der Grenzfälle grün. Das Vergleichsskript gegen den Pellet-Monitor über 3 Tage in der Testinstanz erfüllt die Toleranzen.
 6. **0.6.0 Echtbetrieb:** Release über GitHub, Installation über den Marketplace an der echten HA. Energie-Dashboard und Push-Automation für Störungen eingerichtet.

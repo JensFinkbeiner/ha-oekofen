@@ -44,7 +44,7 @@ Custom Integration `oekofen` für Home Assistant. Sie liest die eigene ÖkoFEN P
   - `live_check.py`: Praxistest mit dem echten Client, im tools-Container.
 - `custom_components/oekofen/quality_scale.yaml`: Stand der Integration Quality Scale. Bei jedem Meilenstein aktualisieren.
 - `custom_components/oekofen/translations/`: `en.json` und `de.json`. Custom Integrations nutzen kein `strings.json`. Jeder Text steht in beiden Dateien.
-- `tests/`: pytest, Fixtures in `tests/fixtures/` (nur erfundene oder anonymisierte Daten, Host immer `192.0.2.x`). `tests/api/` simuliert den Kessel mit `AiohttpClientMocker` und `FakeBoiler`. aioresponses passt nicht zur aiohttp-Version von HA. `test_fixtures_privacy.py` bewacht die Fixtures.
+- `tests/`: pytest, Fixtures in `tests/fixtures/` (nur erfundene oder anonymisierte Daten, Host immer `192.0.2.x`). `tests/api/` simuliert den Kessel mit `AiohttpClientMocker` und `FakeBoiler`. aioresponses passt nicht zur aiohttp-Version von HA. `test_fixtures_privacy.py` bewacht die Fixtures. `conftest.py` legt die `snapshot`-Fixture fest auf `HomeAssistantSnapshotExtension` (`tests/snapshots/`), sonst entscheidet die Ladereihenfolge der Plugins. Für Snapshots aller Entitäten die Fixture `entity_registry_enabled_by_default` nutzen.
 - `devenv/compose.yaml`: Dienst `ha` (Testinstanz) und `tools` (uv, Python 3.14, venv im Docker-Volume).
 - `.github/workflows/`: `validate.yaml` (hassfest, HACS-Action), `tests.yaml` (Ruff, mypy, pytest).
 - `local/`: echte Kesselantworten und lokale Skripte, steht in `.gitignore`.

@@ -129,6 +129,7 @@ Eine Anfrage pro Intervall (`all`). Einheiten, Faktoren und Klartexte (`all??`) 
 | „Der Kessel ist nicht erreichbar“ | IP oder Port falsch, oder die JSON-Schnittstelle ist aus. Am Touch prüfen: JSON-Modus „Ein“, Port. Läuft ein `curl http://<IP>:<Port>/<Passwort>/all` im LAN? |
 | „Der Kessel hat keine Daten geliefert“ | Falsches JSON-Passwort. Der Kessel liefert dann seine Hilfeseite. |
 | „Kessel ausgelastet“ | Ein anderes Programm fragt den Kessel gerade ab. Ein paar Sekunden warten. Den Abstand der anderen Programme nicht unter 30 s setzen. |
+| Ein anderes Programm (z. B. ein eigener Monitor) bekommt dauerhaft HTTP 401 | Beide fragen im selben Takt ab und treffen immer gleichzeitig ein. Hier ein Intervall wählen, das kein Vielfaches des anderen ist, z. B. 67 s statt 60 s. |
 | Entitäten zeitweise „nicht verfügbar“ | Kessel neu gestartet oder WLAN-Aussetzer. Die Integration fragt dann seltener ab (bis 10 min) und erholt sich von selbst. |
 | Werte fehlen oder sind unplausibel | Diagnose herunterladen (Gerät → ⋮ → Diagnose herunterladen). Zugangsdaten und Namen sind darin geschwärzt. |
 

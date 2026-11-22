@@ -323,10 +323,15 @@ Remote: GitHub, öffentliches Repository (Name zum Beispiel `ha-oekofen`), Branc
      - Abgleich mit dem Pellet-Monitor (Abnahme 0.5.0): frühestens am 26.11.2026, nach 3 vollständigen Tagen (23. bis 25.11.).
      - 7-Tage-Abnahme 0.6.0: frühestens am 30.11.2026.
      - Testinstanz am 22.11.2026 gestoppt. Jetzt fragen nur noch der Pellet-Monitor und die echte HA den Kessel ab.
+     - Befund 22.11.2026, 13:46 bis 13:56: Der Pellet-Monitor bekam zehnmal in Folge 401 (Rate-Limit). Ursache: HA und Monitor fragten beide alle 60 s ab, HA lag ein paar Sekunden vor dem Monitor, und wegen des gleichen Takts blieb das so. HA wiederholt nach 3 s, der Monitor nicht.
+     - Entscheidung Jens, 22.11.2026: nur das HA-Abfrageintervall auf 67 s stellen (Optionen in HA). Dann verschieben sich die Takte gegeneinander, der Monitor verliert höchstens selten eine einzelne Abfrage. Wiederholung im Monitor und zufälliger Versatz in der Integration vorerst nicht.
+     - Für die 7-Tage-Abnahme zusätzlich prüfen: Fehlerzähler des Pellet-Monitors (`/api/status`, `consecutive_errors`) und keine Lücken über 5 Minuten.
      - Noch offen: Energie-Dashboard (Pelletenergie als Gasverbrauch), Push-Automation bei Störung.
 7. **1.0.0:** `quality_scale.yaml` vollständig (done oder exempt mit Begründung), README fertig, alle Prüfungen aus Tiefencheck 4 bestanden, Ergebnis im CHANGELOG.
 
 ## Später
+
+- Kollision mit dem Pellet-Monitor dauerhaft lösen, falls 67 s nicht reichen: Wiederholung nach 3 s bei 401 im Pellet-Monitor (`app/egress.py`) und/oder ein zufälliger Versatz pro Abfrage in der Integration.
 
 - Schreiben: Betriebsart Heizkreis und Warmwasser (`select`), Warmwasser-Soll (`number`), „Warmwasser einmal laden“ (`button`), eventuell `water_heater`. Nur mit Freigabeliste, Min/Max-Prüfung aus `all?`, Echo-Prüfung und gesperrten Fühler-Keys. Eigene Planrunde mit Tiefencheck.
 - Protokoll-Code als eigene PyPI-Bibliothek herauslösen (Voraussetzung für Core oder den offiziellen Katalog).

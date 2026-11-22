@@ -2,7 +2,7 @@
 
 Custom Integration für Home Assistant, die ÖkoFEN-Pelletkessel (Pellematic mit Touch-Bedienung) über die **lokale JSON-Schnittstelle** ausliest. Nur lesend, ohne Cloud. Die Daten verlassen das eigene Netz nicht.
 
-> Status: **0.4.0, im Aufbau.** Einrichtung, Geräte, Sensoren, Störungsmeldung und Diagnose funktionieren. Brenner-Statistik und Energie folgen. Fahrplan siehe [PLAN.md](PLAN.md).
+> Status: **0.5.0, im Aufbau.** Alle geplanten Funktionen sind enthalten. Es folgen der Abgleich mit dem Pellet-Monitor und der Echtbetrieb. Fahrplan siehe [PLAN.md](PLAN.md).
 > Privates Projekt ohne Support. Kein offizielles Produkt von ÖkoFEN.
 
 ## Geplanter Umfang (1.0.0)
@@ -43,6 +43,12 @@ Die Verbindung wird beim Einrichten geprüft. Ändert sich später das JSON-Pass
 | Option | Bedeutung |
 |---|---|
 | Abfrageintervall | Sekunden zwischen zwei Abfragen, Standard 60, erlaubt 30 bis 3600 |
+| Nennleistung | Nenn-Wärmeleistung des Kessels in kW, Standard 12 (Pellematic Compact PES 212) |
+| Wirkungsgrad im Betrieb | Prozent, Standard 91. Nicht der Jahresnutzungsgrad vom Energielabel |
+| Heizwert der Pellets | kWh pro kg, Standard 4,8 (ENplus/DINplus) |
+| Kalibrierfaktor | Korrektur der Schätzung, Standard 1,0. Zum Beispiel gemessener durch geschätzten Verbrauch zwischen zwei Lieferungen |
+
+Änderungen an der Schätzung wirken nur auf künftige Werte. Bereits gezählte Summen bleiben unverändert.
 
 ## Geräte und Entitäten
 
@@ -58,6 +64,20 @@ Der Regler erscheint als Gerät „ÖkoFEN Pellematic“, Modell laut Kessel, zu
 
 - „Brenner“ und „Brennerphase“ kommen aus der Kesselphase. Der Kessel-Wert `L_br` zeigt den Brenner bei der Pellematic Compact nicht zuverlässig an.
 - „Status“ zeigt den Statustext des Kessels in der Sprache, die am Touch eingestellt ist.
+
+## Brenner-Statistik und Energie
+
+Der Kessel misst weder Verbrauch noch Wärmemenge. Die Integration schätzt beides, nach demselben Modell wie der Pellet-Monitor:
+
+- **Wärme (geschätzt):** Nennleistung × Modulation × Brennzeit, in kWh.
+- **Pelletverbrauch (geschätzt):** Wärme ÷ (Wirkungsgrad × Heizwert) × Kalibrierfaktor, in kg.
+- **Pelletenergie (geschätzt):** Pelletverbrauch × Heizwert, in kWh. Das ist die eingesetzte Brennstoffenergie.
+- **Brennerstarts heute** kommen aus dem Zähler des Kessels. Starts während einer Lücke werden mitgezählt.
+- **Brennerlaufzeit heute, letzter Brennerlauf, Kurzläufe heute** (unter 15 Minuten): Ein Lauf beginnt und endet zur Hälfte zwischen den zwei Abfragen, die den Wechsel zeigen. Bei 60 s Intervall liegt der Fehler bei höchstens ±30 s je Lauf.
+- Lücken über 5 Minuten (Neustart, Kessel nicht erreichbar) werden nicht aufgefüllt. Ein Lauf, der in eine Lücke fällt, zählt nicht als „letzter Lauf“.
+- Statistik und Summen überstehen einen Neustart.
+
+**Energie-Dashboard:** „Pelletenergie (geschätzt)“ unter „Gasverbrauch“ eintragen. Das Dashboard kennt keine eigene Kategorie für Pellets, nimmt aber Energie in kWh an. Alternativ „Wärme (geschätzt)“ als einzelnes Gerät eintragen.
 
 ## Störungen
 

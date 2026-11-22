@@ -314,6 +314,9 @@ Remote: GitHub, öffentliches Repository (Name zum Beispiel `ha-oekofen`), Branc
      - **Abgenommen am 22.11.2026:** Jens hat den Diagnose-Download geprüft, er enthält weder IP noch Passwort.
 5. **0.5.0 Brenner-Statistik und Energie:** `burner.py`, Tageswerte mit Restore, Energie- und Pelletsensor mit Optionen.
    - Abnahme: Tests der Grenzfälle grün. Das Vergleichsskript gegen den Pellet-Monitor über 3 Tage in der Testinstanz erfüllt die Toleranzen.
+   - Stand 22.11.2026:
+     - 107 Tests grün, 100 % Coverage, `tools/compare_monitor.py` fertig.
+     - **Offen für die Abnahme:** 3 vollständige Tage in der Testinstanz, danach den Abgleich mit einer frischen Kopie der Pellet-Monitor-Datenbank laufen lassen.
 6. **0.6.0 Echtbetrieb:** Release über GitHub, Installation über den Marketplace an der echten HA. Energie-Dashboard und Push-Automation für Störungen eingerichtet.
    - Abnahme: 7 Tage Betrieb mit den Kennzahlen aus Tiefencheck 4.
 7. **1.0.0:** `quality_scale.yaml` vollständig (done oder exempt mit Begründung), README fertig, alle Prüfungen aus Tiefencheck 4 bestanden, Ergebnis im CHANGELOG.

@@ -31,6 +31,14 @@ from .api import (
     OekofenError,
 )
 from .const import (
+    CONF_CALIBRATION,
+    CONF_EFFICIENCY,
+    CONF_HEATING_VALUE,
+    CONF_NOMINAL_KW,
+    DEFAULT_CALIBRATION,
+    DEFAULT_EFFICIENCY,
+    DEFAULT_HEATING_VALUE,
+    DEFAULT_NOMINAL_KW,
     DEFAULT_PORT,
     DEFAULT_SCAN_INTERVAL,
     DEFAULT_TITLE,
@@ -192,22 +200,43 @@ class OekofenOptionsFlow(OptionsFlowWithReload):
         """Show the options."""
         if user_input is not None:
             return self.async_create_entry(
-                data={CONF_SCAN_INTERVAL: int(user_input[CONF_SCAN_INTERVAL])}
+                data={
+                    CONF_SCAN_INTERVAL: int(user_input[CONF_SCAN_INTERVAL]),
+                    CONF_NOMINAL_KW: float(user_input[CONF_NOMINAL_KW]),
+                    CONF_EFFICIENCY: float(user_input[CONF_EFFICIENCY]),
+                    CONF_HEATING_VALUE: float(user_input[CONF_HEATING_VALUE]),
+                    CONF_CALIBRATION: float(user_input[CONF_CALIBRATION]),
+                }
             )
-        current = self.config_entry.options.get(
-            CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL
+        options = self.config_entry.options
+        fields = (
+            (
+                CONF_SCAN_INTERVAL,
+                DEFAULT_SCAN_INTERVAL,
+                MIN_SCAN_INTERVAL,
+                MAX_SCAN_INTERVAL,
+                1,
+                "s",
+            ),
+            (CONF_NOMINAL_KW, DEFAULT_NOMINAL_KW, 2, 100, 0.1, "kW"),
+            (CONF_EFFICIENCY, DEFAULT_EFFICIENCY, 50, 100, 0.1, "%"),
+            (CONF_HEATING_VALUE, DEFAULT_HEATING_VALUE, 3.5, 5.5, 0.01, "kWh/kg"),
+            (CONF_CALIBRATION, DEFAULT_CALIBRATION, 0.5, 2.0, 0.01, ""),
         )
         schema = probatio.Schema(
             {
-                probatio.Required(CONF_SCAN_INTERVAL, default=current): NumberSelector(
+                probatio.Required(
+                    key, default=options.get(key, default)
+                ): NumberSelector(
                     NumberSelectorConfig(
-                        min=MIN_SCAN_INTERVAL,
-                        max=MAX_SCAN_INTERVAL,
-                        step=1,
-                        unit_of_measurement="s",
+                        min=low,
+                        max=high,
+                        step=step,
                         mode=NumberSelectorMode.BOX,
+                        **({"unit_of_measurement": unit} if unit else {}),
                     )
                 )
+                for key, default, low, high, step, unit in fields
             }
         )
         return self.async_show_form(step_id="init", data_schema=schema)

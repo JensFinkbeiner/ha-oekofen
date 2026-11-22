@@ -38,7 +38,13 @@ Custom Integration `oekofen` für Home Assistant. Sie liest die eigene ÖkoFEN P
 - `custom_components/oekofen/diagnostics.py`: Diagnose. Geschwärzt sind `host`, `password`, `name`, `L_source` und `L_location`. Neue Freitext-Keys hier ergänzen, der Snapshot `tests/snapshots/test_diagnostics.ambr` zeigt das Ergebnis.
 - Firmware: `OekofenClient.async_get_firmware` liest den Kopf der Hilfeseite (Pfad `help`), einmal beim Setup, als `sw_version`. Ein Fehler blockiert das Setup nie.
 - `entity.unit_matches`: Legt eine Entität nicht an, wenn die Einheit in den Metadaten nicht zur erwarteten passt. TOTAL_INCREASING-Sensoren laufen nie rückwärts (`OekofenSensor._last_total`).
-- Störung: Binärsensor `fault` und Sensor `fault_message` (mit `data_fn` bzw. `attributes_fn` statt eines einzelnen Keys).
+- Störung: Binärsensor `fault` und Sensor `fault_message` (mit `data_fn` bzw. `attributes_fn` statt eines einzelnen Keys). Beim Sensor bekommt `data_fn` den Coordinator, beim Binärsensor die Daten.
+- `custom_components/oekofen/burner.py` (ohne HA-Imports):
+  - `BurnerTracker` mit `update(Sample, EnergyModel)`: Mittelpunkt-Regel für Laufbeginn und -ende, Zeitintegral mit höchstens `MAX_STEP_S` (300 s), Tageswerte nach lokalem Datum, Starts aus dem Kesselzähler, Wärme und Pellets aufsummiert.
+  - Der Coordinator speichert den Zustand mit `Store` (`oekofen.<entry_id>`, `async_delay_save` 60 s, sofort beim Unload). `async_remove_entry` löscht die Datei.
+  - Optionen `nominal_kw`, `efficiency_percent`, `heating_value`, `calibration` → `coordinator.energy_model`.
+  - Der Rückwärts-Schutz (`_last_total`) gilt nur für Lebensdauer-Zähler ohne `data_fn`, Tageszähler dürfen um Mitternacht auf 0 springen.
+- `tools/compare_monitor.py`: Abgleich mit dem Pellet-Monitor (Starts gleich, Laufzeit ±2 %, Wärme ±5 %). Läuft im tools-Container, weil der Code Python-3.14-Syntax nutzt.
 - `custom_components/oekofen/api/`: Protokoll-Client. **Keine HA-Imports**, damit das Paket später als PyPI-Bibliothek herausgelöst werden kann.
   - `client.py`: `OekofenClient`, das einzige Modul mit Netzwerkzugriff (Egress). Metadaten über `META_PATH = "all??"`, weil yarl das `?` von `all?` entfernt. Daten über `all`. Sperre plus 3 s Abstand, eine Wiederholung bei 401. Exceptions mit `from None`, damit die URL mit dem Passwort nie im Traceback steht.
   - `decode.py`: Dekodierung, JSON-Reparatur, `parse_meta`, `build_data` (Faktoren, Sentinels, V3-Strings), `parse_faults`. `DROPPED_SECTIONS` und `DROPPED_KEYS` regeln den Datenschutz.

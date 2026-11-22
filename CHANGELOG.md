@@ -4,6 +4,23 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/). Versionssc
 MAJOR wird nur auf ausdrücklichen Wunsch erhöht, MINOR bei neuen Funktionen, PATCH bei Fehlerbehebungen.
 Reine Dokumentation und Refactoring ändern die Version nicht.
 
+## [0.5.0] - 2026-11-22
+
+### Hinzugefügt
+- Brenner-Statistik:
+  - Sensoren: Brennerstarts heute (aus dem Zähler des Kessels), Brennerlaufzeit heute, Dauer des letzten Laufs, Kurzläufe heute (unter 15 Minuten).
+  - Ein Lauf beginnt und endet zur Hälfte zwischen den zwei Abfragen, die den Wechsel zeigen, wie im Pellet-Monitor.
+- Energie, geschätzt nach demselben Modell wie der Pellet-Monitor:
+  - Sensoren: Wärme (kWh), Pelletenergie (kWh) und Pelletverbrauch (kg).
+  - Rechnung: Nennleistung × Modulation × Brennzeit, umgerechnet über Wirkungsgrad, Heizwert und Kalibrierfaktor. Lücken über 5 Minuten werden nicht aufgefüllt.
+  - Tauglich fürs Energie-Dashboard.
+- Optionen für die Schätzung: Nennleistung (12 kW), Wirkungsgrad im Betrieb (91 %), Heizwert (4,8 kWh/kg), Kalibrierfaktor (1,0). Eine Änderung wirkt nur auf künftige Werte.
+- Statistik und Summen überstehen Neustart und Reload. Gespeichert wird in `.storage/oekofen.<entry_id>`. Beim Entfernen der Integration wird die Datei gelöscht.
+- `tools/compare_monitor.py`: Vergleicht Starts, Laufzeit und Wärme pro Tag mit der Datenbank des Pellet-Monitors. Es gibt nur Kennzahlen aus.
+
+### Geprüft
+- 22.11.2026: 107 Tests bestanden (95 Snapshots), 100 % Branch-Coverage, mypy strict ohne Befund. Der Abgleich mit dem Pellet-Monitor über 3 Tage steht noch aus (Abnahme).
+
 ## [0.4.0] - 2026-11-22
 
 ### Hinzugefügt

@@ -10,6 +10,7 @@ from homeassistant.const import CONF_SCAN_INTERVAL
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers import device_registry as dr, issue_registry as ir
+from homeassistant.helpers.storage import Store
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.util import dt as dt_util
 
@@ -20,7 +21,17 @@ from .api import (
     OekofenData,
     OekofenError,
 )
+from .burner import STORE_VERSION, BurnerTracker, EnergyModel, Sample
 from .const import (
+    BURNING_STATES,
+    CONF_CALIBRATION,
+    CONF_EFFICIENCY,
+    CONF_HEATING_VALUE,
+    CONF_NOMINAL_KW,
+    DEFAULT_CALIBRATION,
+    DEFAULT_EFFICIENCY,
+    DEFAULT_HEATING_VALUE,
+    DEFAULT_NOMINAL_KW,
     DEFAULT_SCAN_INTERVAL,
     DOMAIN,
     LOGGER,
@@ -44,6 +55,39 @@ type OekofenConfigEntry = ConfigEntry[OekofenRuntimeData]
 def fault_issue_id(entry: OekofenConfigEntry) -> str:
     """Return the id of the repair issue for a boiler fault."""
     return f"boiler_fault_{entry.entry_id}"
+
+
+STORE_SAVE_DELAY = 60
+
+
+def energy_model(options: dict[str, float]) -> EnergyModel:
+    """Return the energy estimate settings from the options of an entry."""
+    return EnergyModel(
+        nominal_kw=float(options.get(CONF_NOMINAL_KW, DEFAULT_NOMINAL_KW)),
+        efficiency=float(options.get(CONF_EFFICIENCY, DEFAULT_EFFICIENCY)) / 100,
+        heating_value_kwh_per_kg=float(
+            options.get(CONF_HEATING_VALUE, DEFAULT_HEATING_VALUE)
+        ),
+        calibration=float(options.get(CONF_CALIBRATION, DEFAULT_CALIBRATION)),
+    )
+
+
+def _sample(data: OekofenData, ts: float) -> Sample:
+    state = data.get("pe1", "L_state")
+    modulation = data.get("pe1", "L_modulation")
+    starts = data.get("pe1", "L_starts")
+    is_int = isinstance(state, int) and not isinstance(state, bool)
+    return Sample(
+        ts=ts,
+        day=dt_util.as_local(dt_util.utc_from_timestamp(ts)).date(),
+        burning=(state in BURNING_STATES) if is_int else None,
+        modulation=float(modulation)
+        if isinstance(modulation, int | float) and not isinstance(modulation, bool)
+        else None,
+        starts=starts
+        if isinstance(starts, int) and not isinstance(starts, bool)
+        else None,
+    )
 
 
 def boiler_model(data: OekofenData) -> str | None:
@@ -77,6 +121,19 @@ class OekofenCoordinator(DataUpdateCoordinator[OekofenData]):
         self._metadata_loaded_at = dt_util.utcnow() - METADATA_REFRESH
         self._failures = 0
         self._busy_skipped = False
+        self.energy_model = energy_model(dict(entry.options))
+        self.tracker = BurnerTracker()
+        self._store: Store[dict[str, object]] = Store(
+            hass, STORE_VERSION, f"{DOMAIN}.{entry.entry_id}"
+        )
+
+    async def async_load_statistics(self) -> None:
+        """Restore the burner statistics saved before the last restart."""
+        self.tracker = BurnerTracker.from_dict(await self._store.async_load())
+
+    async def async_save_statistics(self) -> None:
+        """Write the statistics now (unload/reload; HA flushes on shutdown)."""
+        await self._store.async_save(self.tracker.as_dict())
 
     async def _async_update_data(self) -> OekofenData:
         """Fetch the data; reload the field descriptions once a day."""
@@ -108,6 +165,10 @@ class OekofenCoordinator(DataUpdateCoordinator[OekofenData]):
             self._metadata_loaded_at = now
             self._async_update_model(data)
         self._async_update_fault_issue(data)
+        self.tracker.update(
+            _sample(data, dt_util.utcnow().timestamp()), self.energy_model
+        )
+        self._store.async_delay_save(self.tracker.as_dict, STORE_SAVE_DELAY)
         return data
 
     @staticmethod

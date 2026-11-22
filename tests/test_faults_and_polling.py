@@ -245,3 +245,34 @@ async def test_unexpected_unit_skips_entity(
     assert hass.states.get("sensor.okofen_pellematic_burner_hours") is None
     reported = {call.args[3] for call in logger.warning.call_args_list}
     assert reported == {"s", "Std"}
+
+
+async def test_statistics_survive_restart(
+    hass: HomeAssistant,
+    init_integration: MockConfigEntry,
+    mock_client: MagicMock,
+    freezer: FrozenDateTimeFactory,
+    hass_storage: dict,
+) -> None:
+    coordinator = init_integration.runtime_data.coordinator
+    data = load_data()
+    data.sections["pe1"]["L_state"] = 4  # full burn
+    data.sections["pe1"]["L_modulation"] = 100
+    mock_client.async_get_data.return_value = data
+    await tick(hass, freezer, 60)
+    await tick(hass, freezer, 60)
+    heat = coordinator.tracker.heat_kwh
+    assert heat == pytest.approx(12 / 60)  # one minute at 12 kW
+    assert float(hass.states.get("sensor.okofen_pellematic_heat_estimated").state) == (
+        pytest.approx(heat, abs=0.001)
+    )
+
+    await tick(hass, freezer, 61)  # delayed save
+    await hass.config_entries.async_reload(init_integration.entry_id)
+    await hass.async_block_till_done()
+    restored = init_integration.runtime_data.coordinator.tracker
+    assert restored.heat_kwh >= heat
+
+    await hass.config_entries.async_remove(init_integration.entry_id)
+    await hass.async_block_till_done()
+    assert f"oekofen.{init_integration.entry_id}" not in hass_storage

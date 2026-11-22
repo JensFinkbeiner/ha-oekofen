@@ -57,11 +57,20 @@
       "init": {
         "title": "Optionen",
         "data": {
-          "scan_interval": "Abfrageintervall"
+          "scan_interval": "Abfrageintervall",
+          "nominal_kw": "Nennleistung",
+          "efficiency_percent": "Wirkungsgrad im Betrieb",
+          "heating_value": "Heizwert der Pellets",
+          "calibration": "Kalibrierfaktor"
         },
         "data_description": {
-          "scan_interval": "Sekunden zwischen zwei Abfragen (30 bis 3600). Der Kessel nimmt von allen Programmen zusammen höchstens alle 2,5 Sekunden eine Anfrage an."
-        }
+          "scan_interval": "Sekunden zwischen zwei Abfragen (30 bis 3600). Der Kessel nimmt von allen Programmen zusammen höchstens alle 2,5 Sekunden eine Anfrage an.",
+          "nominal_kw": "Nenn-Wärmeleistung des Kessels in kW (Pellematic Compact PES 212: 12).",
+          "efficiency_percent": "Wirkungsgrad in Prozent, solange der Brenner läuft (Richtwert 91). Nicht der Jahresnutzungsgrad vom Energielabel.",
+          "heating_value": "kWh pro kg (ENplus/DINplus etwa 4,8).",
+          "calibration": "Korrigiert die Schätzung, zum Beispiel gemessener durch geschätzten Verbrauch zwischen zwei Lieferungen. 1,0 = keine Korrektur."
+        },
+        "description": "Änderungen wirken nur auf künftige Werte; bereits gezählte Summen bleiben unverändert."
       }
     }
   },
@@ -211,6 +220,27 @@
       },
       "fault_message": {
         "name": "Störungsmeldung"
+      },
+      "starts_today": {
+        "name": "Brennerstarts heute"
+      },
+      "runtime_today": {
+        "name": "Brennerlaufzeit heute"
+      },
+      "last_run_duration": {
+        "name": "Letzter Brennerlauf"
+      },
+      "short_runs_today": {
+        "name": "Kurzläufe heute"
+      },
+      "heat_energy": {
+        "name": "Wärme (geschätzt)"
+      },
+      "pellet_energy": {
+        "name": "Pelletenergie (geschätzt)"
+      },
+      "pellet_consumption": {
+        "name": "Pelletverbrauch (geschätzt)"
       }
     }
   },

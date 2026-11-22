@@ -15,13 +15,14 @@ from homeassistant.components.sensor import (
 from homeassistant.const import (
     PERCENTAGE,
     EntityCategory,
+    UnitOfEnergy,
+    UnitOfMass,
     UnitOfTemperature,
     UnitOfTime,
 )
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
-from .api import OekofenData
 from .const import BURNER_PHASES
 from .coordinator import OekofenConfigEntry, OekofenCoordinator
 from .entity import (
@@ -43,11 +44,12 @@ class OekofenSensorEntityDescription(OekofenEntityDescription, SensorEntityDescr
     # Without a room sensor the boiler sends 0 instead of a sentinel value.
     zero_is_none: bool = False
     # Values computed from the whole answer instead of one key.
-    data_fn: Callable[[OekofenData], str | int | float | None] | None = None
-    attributes_fn: Callable[[OekofenData], Mapping[str, Any]] | None = None
+    data_fn: Callable[[OekofenCoordinator], str | int | float | None] | None = None
+    attributes_fn: Callable[[OekofenCoordinator], Mapping[str, Any]] | None = None
 
 
-def _fault_text(data: OekofenData) -> str | None:
+def _fault_text(coordinator: OekofenCoordinator) -> str | None:
+    data = coordinator.data
     if not data.faults:
         return None
     fault = data.faults[0]
@@ -55,7 +57,8 @@ def _fault_text(data: OekofenData) -> str | None:
     return text[:STATE_TEXT_MAX]
 
 
-def _fault_attributes(data: OekofenData) -> dict[str, Any]:
+def _fault_attributes(coordinator: OekofenCoordinator) -> dict[str, Any]:
+    data = coordinator.data
     return {
         "faults": [
             {"date": f.date, "text": f.text, "code": f.code} for f in data.faults
@@ -172,6 +175,81 @@ SENSORS: tuple[OekofenSensorEntityDescription, ...] = (
         native_unit_of_measurement=UnitOfTime.MINUTES,
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
+    # Burner statistics and energy, computed by the integration (burner.py)
+    OekofenSensorEntityDescription(
+        key="starts_today",
+        translation_key="starts_today",
+        kind="pe",
+        value_key="L_starts",
+        state_class=SensorStateClass.TOTAL_INCREASING,
+        data_fn=lambda c: c.tracker.starts_today,
+    ),
+    OekofenSensorEntityDescription(
+        key="runtime_today",
+        translation_key="runtime_today",
+        kind="pe",
+        value_key="L_state",
+        device_class=SensorDeviceClass.DURATION,
+        state_class=SensorStateClass.TOTAL_INCREASING,
+        native_unit_of_measurement=UnitOfTime.MINUTES,
+        suggested_display_precision=0,
+        data_fn=lambda c: round(c.tracker.runtime_today_min, 1),
+    ),
+    OekofenSensorEntityDescription(
+        key="last_run_duration",
+        translation_key="last_run_duration",
+        kind="pe",
+        value_key="L_state",
+        device_class=SensorDeviceClass.DURATION,
+        native_unit_of_measurement=UnitOfTime.MINUTES,
+        suggested_display_precision=0,
+        data_fn=lambda c: (
+            None if c.tracker.last_run_min is None else round(c.tracker.last_run_min, 1)
+        ),
+    ),
+    OekofenSensorEntityDescription(
+        key="short_runs_today",
+        translation_key="short_runs_today",
+        kind="pe",
+        value_key="L_state",
+        state_class=SensorStateClass.TOTAL_INCREASING,
+        data_fn=lambda c: c.tracker.short_runs_today,
+    ),
+    OekofenSensorEntityDescription(
+        key="heat_energy",
+        translation_key="heat_energy",
+        kind="pe",
+        value_key="L_modulation",
+        device_class=SensorDeviceClass.ENERGY,
+        state_class=SensorStateClass.TOTAL_INCREASING,
+        native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
+        suggested_display_precision=1,
+        data_fn=lambda c: round(c.tracker.heat_kwh, 3),
+    ),
+    OekofenSensorEntityDescription(
+        key="pellet_energy",
+        translation_key="pellet_energy",
+        kind="pe",
+        value_key="L_modulation",
+        device_class=SensorDeviceClass.ENERGY,
+        state_class=SensorStateClass.TOTAL_INCREASING,
+        native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
+        suggested_display_precision=1,
+        data_fn=lambda c: round(
+            c.tracker.pellets_kg * c.energy_model.heating_value_kwh_per_kg, 3
+        ),
+    ),
+    OekofenSensorEntityDescription(
+        key="pellet_consumption",
+        translation_key="pellet_consumption",
+        kind="pe",
+        value_key="L_modulation",
+        device_class=SensorDeviceClass.WEIGHT,
+        state_class=SensorStateClass.TOTAL_INCREASING,
+        native_unit_of_measurement=UnitOfMass.KILOGRAMS,
+        suggested_display_precision=1,
+        data_fn=lambda c: round(c.tracker.pellets_kg, 3),
+    ),
     # Heating circuits
     _temperature("hk", "flow_temperature", "L_flowtemp_act"),
     _temperature("hk", "flow_target_temperature", "L_flowtemp_set"),
@@ -242,15 +320,17 @@ class OekofenSensor(OekofenEntity, SensorEntity):
         """Return extra attributes (list of faults for the fault sensor)."""
         if self.entity_description.attributes_fn is None:
             return None
-        return self.entity_description.attributes_fn(self.coordinator.data)
+        return self.entity_description.attributes_fn(self.coordinator)
 
     @property
     def native_value(self) -> str | int | float | None:
         """Return the value in the form Home Assistant expects."""
         value = self._value()
-        if self.state_class is SensorStateClass.TOTAL_INCREASING and isinstance(
-            value, int | float
-        ):
+        lifetime_counter = (
+            self.state_class is SensorStateClass.TOTAL_INCREASING
+            and self.entity_description.data_fn is None
+        )
+        if lifetime_counter and isinstance(value, int | float):
             # A counter that goes backwards would be read as a reset by the
             # statistics; keep the last value instead (e.g. touch panel restart).
             if self._last_total is not None and value < self._last_total:
@@ -261,7 +341,7 @@ class OekofenSensor(OekofenEntity, SensorEntity):
     def _value(self) -> str | int | float | None:
         description = self.entity_description
         if description.data_fn is not None:
-            return description.data_fn(self.coordinator.data)
+            return description.data_fn(self.coordinator)
         value = self.raw_value
         match self.entity_description.kind_of_value:
             case "enum_phase":

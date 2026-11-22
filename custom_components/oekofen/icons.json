@@ -56,6 +56,27 @@
       },
       "fault_message": {
         "default": "mdi:alert-outline"
+      },
+      "starts_today": {
+        "default": "mdi:counter"
+      },
+      "short_runs_today": {
+        "default": "mdi:sync-alert"
+      },
+      "runtime_today": {
+        "default": "mdi:timer-outline"
+      },
+      "last_run_duration": {
+        "default": "mdi:timer-check-outline"
+      },
+      "pellet_consumption": {
+        "default": "mdi:grain"
+      },
+      "pellet_energy": {
+        "default": "mdi:grain"
+      },
+      "heat_energy": {
+        "default": "mdi:radiator"
       }
     }
   }

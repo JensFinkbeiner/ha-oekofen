@@ -21,6 +21,16 @@ MAX_SCAN_INTERVAL: Final = 3600
 # Longest interval while the boiler stays unreachable (doubling backoff).
 MAX_BACKOFF: Final = timedelta(minutes=10)
 
+# Options of the energy estimate (same defaults as the Pellet-Monitor).
+CONF_NOMINAL_KW: Final = "nominal_kw"
+CONF_EFFICIENCY: Final = "efficiency_percent"
+CONF_HEATING_VALUE: Final = "heating_value"
+CONF_CALIBRATION: Final = "calibration"
+DEFAULT_NOMINAL_KW: Final = 12.0
+DEFAULT_EFFICIENCY: Final = 91.0
+DEFAULT_HEATING_VALUE: Final = 4.8
+DEFAULT_CALIBRATION: Final = 1.0
+
 # Factors, units and enum texts rarely change; reload them once a day.
 METADATA_REFRESH: Final = timedelta(hours=24)
 

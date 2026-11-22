@@ -57,11 +57,20 @@
       "init": {
         "title": "Options",
         "data": {
-          "scan_interval": "Polling interval"
+          "scan_interval": "Polling interval",
+          "nominal_kw": "Nominal power",
+          "efficiency_percent": "Efficiency while burning",
+          "heating_value": "Heating value of the pellets",
+          "calibration": "Calibration factor"
         },
         "data_description": {
-          "scan_interval": "Seconds between two requests (30 to 3600). The boiler accepts at most one request every 2.5 seconds from all clients together."
-        }
+          "scan_interval": "Seconds between two requests (30 to 3600). The boiler accepts at most one request every 2.5 seconds from all clients together.",
+          "nominal_kw": "Nominal heat output of the boiler in kW (Pellematic Compact PES 212: 12).",
+          "efficiency_percent": "Efficiency in percent while the burner runs (rule of thumb 91). Not the seasonal efficiency of the energy label.",
+          "heating_value": "kWh per kg (ENplus/DINplus about 4.8).",
+          "calibration": "Corrects the estimate, e.g. measured consumption divided by estimated consumption between two deliveries. 1.0 = no correction."
+        },
+        "description": "The estimate only affects future values; totals already counted stay as they are."
       }
     }
   },
@@ -211,6 +220,27 @@
       },
       "fault_message": {
         "name": "Fault message"
+      },
+      "starts_today": {
+        "name": "Burner starts today"
+      },
+      "runtime_today": {
+        "name": "Burner runtime today"
+      },
+      "last_run_duration": {
+        "name": "Last burner run"
+      },
+      "short_runs_today": {
+        "name": "Short runs today"
+      },
+      "heat_energy": {
+        "name": "Heat (estimated)"
+      },
+      "pellet_energy": {
+        "name": "Pellet energy (estimated)"
+      },
+      "pellet_consumption": {
+        "name": "Pellet consumption (estimated)"
       }
     }
   },

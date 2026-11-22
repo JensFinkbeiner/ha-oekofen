@@ -107,6 +107,8 @@ def unit_matches(
     Protects against firmware that e.g. reports a duration in seconds where
     the description expects minutes. Unknown units are logged, not rejected.
     """
+    if getattr(description, "data_fn", None) is not None:
+        return True  # computed by the integration, not read from this key
     expected = getattr(description, "native_unit_of_measurement", None)
     meta = data.field_meta(section, description.value_key)
     if expected is None or meta is None or meta.unit is None:

@@ -173,14 +173,34 @@ async def test_options_flow(
     assert result["step_id"] == "init"
 
     result = await hass.config_entries.options.async_configure(
-        result["flow_id"], {CONF_SCAN_INTERVAL: 120}
+        result["flow_id"],
+        {
+            CONF_SCAN_INTERVAL: 120,
+            "nominal_kw": 15,
+            "efficiency_percent": 90,
+            "heating_value": 5,
+            "calibration": 1.1,
+        },
     )
     await hass.async_block_till_done()
     assert result["type"] is FlowResultType.CREATE_ENTRY
-    assert init_integration.options == {CONF_SCAN_INTERVAL: 120}
+    assert init_integration.options == {
+        CONF_SCAN_INTERVAL: 120,
+        "nominal_kw": 15.0,
+        "efficiency_percent": 90.0,
+        "heating_value": 5.0,
+        "calibration": 1.1,
+    }
     coordinator = init_integration.runtime_data.coordinator
     assert coordinator.update_interval is not None
     assert coordinator.update_interval.total_seconds() == 120
+    model = coordinator.energy_model
+    assert (model.nominal_kw, model.efficiency, model.heating_value_kwh_per_kg) == (
+        15.0,
+        0.9,
+        5.0,
+    )
+    assert model.calibration == 1.1
 
 
 async def test_password_not_sent_back_after_error(

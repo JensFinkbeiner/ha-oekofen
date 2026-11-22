@@ -1,0 +1,39 @@
+# Secrets und lokale Einstellungen
+.env
+.env.*
+!.env.example
+
+# Laufzeitdaten
+data/
+*.log
+
+# Abhängigkeiten und Builds
+node_modules/
+.venv/
+venv/
+__pycache__/
+/dist/
+/build/
+
+# Betriebssystem und Editor
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+
+# Weitergabe-Pakete
+*.tar
+
+# Echte Kesselantworten und lokale Notizen (vertraulich, nie ins Repo)
+local/
+
+# Python-Werkzeuge
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# HA-Testinstanz (Konfiguration und Datenbank entstehen beim Start)
+devenv/config/

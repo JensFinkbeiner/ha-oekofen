@@ -1,0 +1,34 @@
+# Local development environment on Rancher Desktop (dockerd/moby).
+#   ha:    Home Assistant test instance with this integration mounted, http://127.0.0.1:8123
+#   tools: Python 3.14 with uv for tests, Ruff and mypy (no local Python needed)
+name: ha-oekofen-dev
+
+services:
+  ha:
+    image: ghcr.io/home-assistant/home-assistant:2026.11.2
+    container_name: ha-oekofen-test
+    restart: unless-stopped
+    environment:
+      TZ: Europe/Berlin
+    volumes:
+      - ./config:/config
+      - ../custom_components/oekofen:/config/custom_components/oekofen:ro
+    ports:
+      - "127.0.0.1:8123:8123"
+
+  tools:
+    image: ghcr.io/astral-sh/uv:python3.14-bookworm-slim
+    profiles: ["tools"]
+    working_dir: /repo
+    environment:
+      # Keep the virtualenv inside a Docker volume, not on the Windows file system.
+      UV_PROJECT_ENVIRONMENT: /venv
+      UV_LINK_MODE: copy
+    volumes:
+      - ..:/repo
+      - venv:/venv
+      - uv-cache:/root/.cache/uv
+
+volumes:
+  venv:
+  uv-cache:

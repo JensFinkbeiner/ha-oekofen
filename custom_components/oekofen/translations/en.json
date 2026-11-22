@@ -1,0 +1,23 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect ÖkoFEN Pellematic",
+        "description": "Enable the JSON interface on the boiler's touch panel first (General settings → Network → JSON mode \"On\", not \"compatible\").",
+        "data": {
+          "host": "Host",
+          "port": "JSON port",
+          "password": "JSON password"
+        },
+        "data_description": {
+          "host": "IP address or host name of the boiler in your network.",
+          "port": "Port of the JSON interface, usually 4321.",
+          "password": "Password of the JSON interface. This is not the password of the ÖkoFEN web portal."
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "This boiler is already configured."
+    }
+  }
+}

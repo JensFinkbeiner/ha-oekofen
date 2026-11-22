@@ -1,0 +1,56 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "HA-Testinstanz: Starten",
+      "type": "shell",
+      "command": "docker compose -f devenv/compose.yaml up -d ha ; echo Home Assistant: http://127.0.0.1:8123",
+      "problemMatcher": []
+    },
+    {
+      "label": "HA-Testinstanz: Neu starten (nach Codeaenderung)",
+      "type": "shell",
+      "command": "docker compose -f devenv/compose.yaml restart ha",
+      "problemMatcher": []
+    },
+    {
+      "label": "HA-Testinstanz: Stoppen",
+      "type": "shell",
+      "command": "docker compose -f devenv/compose.yaml stop ha",
+      "problemMatcher": []
+    },
+    {
+      "label": "HA-Testinstanz: Logs anzeigen",
+      "type": "shell",
+      "command": "docker compose -f devenv/compose.yaml logs -f --tail 200 ha",
+      "problemMatcher": []
+    },
+    {
+      "label": "HA-Testinstanz: Im Browser oeffnen",
+      "type": "shell",
+      "windows": { "command": "start http://127.0.0.1:8123" },
+      "osx": { "command": "open http://127.0.0.1:8123" },
+      "linux": { "command": "xdg-open http://127.0.0.1:8123" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Tests ausfuehren",
+      "type": "shell",
+      "command": "docker compose -f devenv/compose.yaml run --rm tools uv run pytest",
+      "group": { "kind": "test", "isDefault": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "Lint und Typpruefung",
+      "type": "shell",
+      "command": "docker compose -f devenv/compose.yaml run --rm tools sh -c \"uv run ruff check . && uv run ruff format --check . && uv run mypy\"",
+      "problemMatcher": []
+    },
+    {
+      "label": "Code formatieren",
+      "type": "shell",
+      "command": "docker compose -f devenv/compose.yaml run --rm tools sh -c \"uv run ruff check --fix . && uv run ruff format .\"",
+      "problemMatcher": []
+    }
+  ]
+}

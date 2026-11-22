@@ -1,0 +1,23 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "ÖkoFEN Pellematic verbinden",
+        "description": "Aktiviere zuerst die JSON-Schnittstelle am Touch des Kessels (Allgemeine Einstellungen → Netzwerk → JSON-Modus „Ein“, nicht „kompatibel“).",
+        "data": {
+          "host": "Host",
+          "port": "JSON-Port",
+          "password": "JSON-Passwort"
+        },
+        "data_description": {
+          "host": "IP-Adresse oder Hostname des Kessels in deinem Netz.",
+          "port": "Port der JSON-Schnittstelle, meist 4321.",
+          "password": "Passwort der JSON-Schnittstelle. Nicht das Passwort des ÖkoFEN-Webportals."
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "Dieser Kessel ist bereits eingerichtet."
+    }
+  }
+}

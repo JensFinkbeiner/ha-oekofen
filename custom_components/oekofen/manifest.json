@@ -1,0 +1,12 @@
+{
+  "domain": "oekofen",
+  "name": "ÖkoFEN Pellematic",
+  "codeowners": ["@JensFinkbeiner"],
+  "config_flow": true,
+  "documentation": "https://github.com/JensFinkbeiner/ha-oekofen",
+  "integration_type": "device",
+  "iot_class": "local_polling",
+  "issue_tracker": "https://github.com/JensFinkbeiner/ha-oekofen/issues",
+  "requirements": [],
+  "version": "0.1.0"
+}

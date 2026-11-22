@@ -291,7 +291,7 @@ Remote: GitHub, öffentliches Repository (Name zum Beispiel `ha-oekofen`), Branc
    - Stand 22.11.2026:
      - 83 Tests grün, 100 % Coverage. Testinstanz am echten Kessel mit 38 Entitäten ohne Fehler.
      - Review umgesetzt (siehe CHANGELOG 0.3.0).
-     - **Offen für die Abnahme:** Jens vergleicht 10 Werte mit dem Touch bzw. dem Pellet-Monitor.
+     - **Abgenommen am 22.11.2026:** Jens hat 10 Werte in der Testinstanz mit dem Touch bzw. dem Pellet-Monitor verglichen, sie stimmen.
    - Aus dem Review übernommen in 0.4.0:
      - Modell des Kessels nach jeder Metadaten-Aktualisierung im Geräteregister nachziehen.
      - Einheit aus den Metadaten gegen die erwartete Einheit prüfen und bei Abweichung warnen.

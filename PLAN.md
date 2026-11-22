@@ -322,7 +322,8 @@ Remote: GitHub, öffentliches Repository (Name zum Beispiel `ha-oekofen`), Branc
    - Stand 22.11.2026: Release v0.5.0 veröffentlicht. Jens hat die Integration über den Marketplace an der echten HA installiert und eingerichtet. Damit beginnt der Echtbetrieb.
      - Abgleich mit dem Pellet-Monitor (Abnahme 0.5.0): frühestens am 26.11.2026, nach 3 vollständigen Tagen (23. bis 25.11.).
      - 7-Tage-Abnahme 0.6.0: frühestens am 30.11.2026.
-     - Noch offen: Energie-Dashboard (Pelletenergie als Gasverbrauch), Push-Automation bei Störung, Testinstanz stoppen (sonst fragen drei Programme den Kessel ab).
+     - Testinstanz am 22.11.2026 gestoppt. Jetzt fragen nur noch der Pellet-Monitor und die echte HA den Kessel ab.
+     - Noch offen: Energie-Dashboard (Pelletenergie als Gasverbrauch), Push-Automation bei Störung.
 7. **1.0.0:** `quality_scale.yaml` vollständig (done oder exempt mit Begründung), README fertig, alle Prüfungen aus Tiefencheck 4 bestanden, Ergebnis im CHANGELOG.
 
 ## Später

@@ -10,7 +10,7 @@ Nach jeder abgeschlossenen Änderung, in dieser Reihenfolge (Regeln aus `CLAUDE.
 1. Tests und Lint im Container:
    - `docker compose -f devenv/compose.yaml run --rm tools uv run pytest`
    - `docker compose -f devenv/compose.yaml run --rm tools sh -c "uv run ruff check . && uv run ruff format --check . && uv run mypy"`
-   - Hat sich das Lockfile geändert, `uv lock` im selben Container ausführen und `uv.lock` mit committen.
+   - Nach jeder Versionsänderung in `pyproject.toml` und nach Änderungen an Abhängigkeiten `uv lock` im Container ausführen und `uv.lock` mit committen. Sonst schlägt `uv sync --locked` in der CI fehl.
 2. Version: PATCH bei einer Fehlerbehebung, MINOR bei einer neuen Funktion, MAJOR nur auf ausdrücklichen Wunsch. Reine Doku-, Refactoring- und Werkzeug-Änderungen bekommen keine neue Version. Die Version steht an drei Stellen und ist überall gleich: `VERSION`, `pyproject.toml`, `custom_components/oekofen/manifest.json`.
 3. `CHANGELOG.md`: neuer Abschnitt `## [x.y.z] - JJJJ-MM-TT` oberhalb des letzten, mit „Hinzugefügt“, „Geändert“, „Behoben“.
 4. Mitpflegen, wenn betroffen:

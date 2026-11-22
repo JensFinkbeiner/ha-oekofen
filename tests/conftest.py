@@ -10,6 +10,8 @@ from homeassistant.const import CONF_HOST, CONF_PASSWORD, CONF_PORT, Platform
 from homeassistant.core import HomeAssistant
 import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry
+from pytest_homeassistant_custom_component.syrupy import HomeAssistantSnapshotExtension
+from syrupy.assertion import SnapshotAssertion
 
 from custom_components.oekofen.api import OekofenData
 from custom_components.oekofen.api.decode import (
@@ -94,3 +96,13 @@ def entity_registry_enabled_by_default() -> Generator[None]:
         new_callable=PropertyMock,
     ):
         yield
+
+
+@pytest.fixture
+def snapshot(snapshot: SnapshotAssertion) -> SnapshotAssertion:
+    """Always use the HA snapshot extension (tests/snapshots/*.ambr).
+
+    Without this, the plugin load order decides whether syrupy's own fixture
+    (folder __snapshots__) wins, which made CI fail at random.
+    """
+    return snapshot.use_extension(HomeAssistantSnapshotExtension)

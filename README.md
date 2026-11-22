@@ -2,7 +2,7 @@
 
 Custom Integration für Home Assistant, die ÖkoFEN-Pelletkessel (Pellematic mit Touch-Bedienung) über die **lokale JSON-Schnittstelle** ausliest. Nur lesend, ohne Cloud. Die Daten verlassen das eigene Netz nicht.
 
-> Status: **0.2.0, im Aufbau.** Der Protokoll-Client steht und ist am echten Kessel getestet. Die Integration lässt sich einrichten, liefert aber noch keine Entitäten. Fahrplan siehe [PLAN.md](PLAN.md).
+> Status: **0.3.0, im Aufbau.** Einrichtung, Geräte, Sensoren und Binärsensoren funktionieren. Störungsmeldung, Brenner-Statistik und Energie folgen. Fahrplan siehe [PLAN.md](PLAN.md).
 > Privates Projekt ohne Support. Kein offizielles Produkt von ÖkoFEN.
 
 ## Geplanter Umfang (1.0.0)
@@ -35,6 +35,40 @@ Custom Integration für Home Assistant, die ÖkoFEN-Pelletkessel (Pellematic mit
 | Host | IP-Adresse oder Hostname des Kessels |
 | JSON-Port | Port der JSON-Schnittstelle, Standard `4321` |
 | JSON-Passwort | Passwort der JSON-Schnittstelle |
+
+Die Verbindung wird beim Einrichten geprüft. Ändert sich später das JSON-Passwort, fragt Home Assistant von selbst nach dem neuen. Host und Port lassen sich über ⋮ → „Neu konfigurieren“ ändern.
+
+### Optionen
+
+| Option | Bedeutung |
+|---|---|
+| Abfrageintervall | Sekunden zwischen zwei Abfragen, Standard 60, erlaubt 30 bis 3600 |
+
+## Geräte und Entitäten
+
+Der Regler erscheint als Gerät „ÖkoFEN Pellematic“, Modell laut Kessel, zum Beispiel COMPACT. Heizkreise, Puffer, Warmwasser und Zirkulation erscheinen als Untergeräte. Die Integration legt nur an, was der Kessel meldet. Kommt später ein Bereich dazu, zum Beispiel ein zweiter Heizkreis, erscheint er ohne Neustart. Ein Untergerät, das der Kessel nicht mehr meldet, kann man in HA löschen.
+
+| Gerät | Entitäten (Standard aktiv) | Zusätzlich, standardmäßig deaktiviert |
+|---|---|---|
+| Regler und Kessel | Außentemperatur, Kesseltemperatur, Kessel-Soll, Feuerraumtemperatur, Modulation, Brennerphase, Status, Brenner (an/aus). Diagnose: Brennerstarts, Brennerstunden, mittlere Laufzeit | Temperatur und Bewölkung vom Wetterdienst, Feuerraum-Soll, externer Kesselfühler, Saugzuggebläse, Verbrennungsluft, Kesselpumpe |
+| Heizkreis | Vorlauf, Vorlauf-Soll, Status, Pumpe | Raumtemperatur und Raum-Soll (nur mit Raumfühler sinnvoll) |
+| Puffer | Temperatur oben, Temperatur Mitte, Pufferpumpe (%), Status | Solltemperaturen oben und Mitte |
+| Warmwasser | Warmwassertemperatur, Warmwasser-Soll, Status, Pumpe | Warmwassertemperatur unten |
+| Zirkulation | Rücklauftemperatur, Pumpe | Freigabetemperatur |
+
+- „Brenner“ und „Brennerphase“ kommen aus der Kesselphase. Der Kessel-Wert `L_br` zeigt den Brenner bei der Pellematic Compact nicht zuverlässig an.
+- „Status“ zeigt den Statustext des Kessels in der Sprache, die am Touch eingestellt ist.
+
+## Datenabfrage
+
+Eine Anfrage pro Intervall (`all`). Einheiten, Faktoren und Klartexte (`all??`) holt die Integration beim Start und danach einmal täglich. Ist der Kessel nicht erreichbar, werden die Entitäten „nicht verfügbar“, und sie kommen von selbst zurück, sobald er wieder antwortet.
+
+## Bekannte Einschränkungen
+
+- Nur lesend: keine Betriebsarten, Sollwerte oder Warmwasser-Einmalladung.
+- Pelletvorrat und -verbrauch misst der Kessel nicht. `L_storage_*` ist ein fester Einstellwert und wird deshalb nicht angeboten.
+- Kein HTTPS: Das JSON-Passwort steht im Klartext in der Anfrage im LAN (Vorgabe von ÖkoFEN).
+- Der Kessel wird nicht automatisch gefunden. Host und Port gibst du selbst ein.
 
 ## Entfernen
 

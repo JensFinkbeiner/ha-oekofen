@@ -15,9 +15,23 @@ Custom Integration `oekofen` für Home Assistant. Sie liest die eigene ÖkoFEN P
 
 ## Aufbau
 
-- `custom_components/oekofen/__init__.py`: Setup und Unload, `OekofenRuntimeData` in `entry.runtime_data`, Typ `OekofenConfigEntry`.
-- `custom_components/oekofen/config_flow.py`: Einrichtung über Host, Port und JSON-Passwort. Ab 0.3.0 kommen Verbindungstest, reauth, reconfigure und Optionen dazu.
-- `custom_components/oekofen/const.py`: Domain, Standardport 4321, Intervalle (Standard 60 s, mindestens 30 s).
+- `custom_components/oekofen/__init__.py`:
+  - Setup: Client mit `async_get_clientsession`, danach der erste Abruf, danach wird das Hauptgerät registriert. Erst dann werden die Plattformen geladen.
+  - Unload.
+  - `async_remove_config_entry_device`: nur Untergeräte, deren Bereich fehlt, und nur, wenn die Integration geladen ist.
+- `custom_components/oekofen/coordinator.py`: `OekofenRuntimeData` (Client, Coordinator, `main_device_id`), Typ `OekofenConfigEntry`. `OekofenCoordinator` holt alle 60 s (Option) die Daten, die Metadaten einmal täglich. `OekofenAuthError` wird zu `ConfigEntryAuthFailed` (Reauth), andere Fehler zu `UpdateFailed` mit `translation_key`.
+- `custom_components/oekofen/entity.py`:
+  - Geräte: `pe1`, `system` und `weather` liegen auf dem Hauptgerät. `hk`, `pu`, `ww`, `circ` und weitere `pe` werden Untergeräte.
+  - **HA ≥ 2026.10:** `ChildDeviceInfo(parent_device_id=...)` statt `via_device`. Das Hauptgerät wird deshalb vorher mit `async_register_main_device` angelegt. Entity-IDs der Untergeräte beginnen mit dem Namen des Hauptgeräts, zum Beispiel `sensor.okofen_pellematic_heating_circuit_1_…`. Im Registry sucht man sie mit `async_get_device_by_identifier` bzw. `async_get_child_device_by_identifier`, `async_get_device` ist deprecated.
+  - `OekofenEntityDescription` hat die Felder `kind` (Präfix des Bereichs) und `value_key` (JSON-Key).
+  - `async_setup_section_entities` legt Entitäten pro vorhandenem Bereich an und ergänzt neue Bereiche über einen Coordinator-Listener (dynamic-devices).
+- `custom_components/oekofen/sensor.py`:
+  - `SENSORS` mit `kind_of_value`: `number`, `enum_phase` (Kesselphase über `const.BURNER_PHASES`) oder `text` (Statustext, `|` wird zu `, `).
+  - `zero_is_none` für die Raumtemperatur ohne Fühler. Prozentwerte außerhalb von 0 bis 100 ergeben `None`.
+- `custom_components/oekofen/binary_sensor.py`: Brenner (aus `L_state` in `BURNING_STATES`, nicht aus `L_br`) und Pumpen.
+- `custom_components/oekofen/config_flow.py`: Schritte `user`, `reauth_confirm` und `reconfigure` (alle mit Verbindungstest `_async_test_connection`) sowie die Option Abfrageintervall (`OptionsFlowWithReload`). Doppelte Einrichtung wird über `_async_abort_entries_match` auf Host und Port erkannt, weil der Kessel keine Seriennummer liefert. Schemas mit `probatio`.
+- `custom_components/oekofen/const.py`: Domain, Standardport 4321, Intervalle (Standard 60 s, 30 bis 3600 s), `METADATA_REFRESH`, `BURNING_STATES`, `BURNER_PHASES`.
+- `custom_components/oekofen/icons.json`: Icons pro `translation_key`.
 - `custom_components/oekofen/api/`: Protokoll-Client. **Keine HA-Imports**, damit das Paket später als PyPI-Bibliothek herausgelöst werden kann.
   - `client.py`: `OekofenClient`, das einzige Modul mit Netzwerkzugriff (Egress). Metadaten über `META_PATH = "all??"`, weil yarl das `?` von `all?` entfernt. Daten über `all`. Sperre plus 3 s Abstand, eine Wiederholung bei 401. Exceptions mit `from None`, damit die URL mit dem Passwort nie im Traceback steht.
   - `decode.py`: Dekodierung, JSON-Reparatur, `parse_meta`, `build_data` (Faktoren, Sentinels, V3-Strings), `parse_faults`. `DROPPED_SECTIONS` und `DROPPED_KEYS` regeln den Datenschutz.

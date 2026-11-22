@@ -14,10 +14,206 @@
           "port": "Port der JSON-Schnittstelle, meist 4321.",
           "password": "Passwort der JSON-Schnittstelle. Nicht das Passwort des ÖkoFEN-Webportals."
         }
+      },
+      "reauth_confirm": {
+        "title": "Neues JSON-Passwort",
+        "description": "Der Kessel hat das JSON-Passwort abgelehnt. Gib das aktuelle Passwort der JSON-Schnittstelle ein.",
+        "data": {
+          "password": "JSON-Passwort"
+        },
+        "data_description": {
+          "password": "Passwort der JSON-Schnittstelle. Nicht das Passwort des ÖkoFEN-Webportals."
+        }
+      },
+      "reconfigure": {
+        "title": "Verbindung ändern",
+        "description": "Ändere Adresse oder Port des Kessels. Das JSON-Passwort bleibt gleich.",
+        "data": {
+          "host": "Host",
+          "port": "JSON-Port"
+        },
+        "data_description": {
+          "host": "IP-Adresse oder Hostname des Kessels in deinem Netz.",
+          "port": "Port der JSON-Schnittstelle, meist 4321."
+        }
       }
     },
+    "error": {
+      "cannot_connect": "Der Kessel ist nicht erreichbar. Prüfe Host, Port und ob die JSON-Schnittstelle aktiv ist.",
+      "invalid_auth": "Der Kessel hat keine Daten geliefert. Prüfe das JSON-Passwort.",
+      "invalid_answer": "Die Antwort des Kessels ließ sich nicht lesen.",
+      "no_boiler": "Die Antwort enthält keine Kesseldaten (Bereich pe1 fehlt).",
+      "unknown": "Unerwarteter Fehler, siehe Protokoll.",
+      "busy": "Der Kessel ist ausgelastet (ein anderes Programm fragt ihn gerade ab). Versuche es in ein paar Sekunden erneut."
+    },
     "abort": {
-      "already_configured": "Dieser Kessel ist bereits eingerichtet."
+      "already_configured": "Dieser Kessel ist bereits eingerichtet.",
+      "reauth_successful": "Das JSON-Passwort wurde aktualisiert.",
+      "reconfigure_successful": "Die Verbindung wurde aktualisiert."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Optionen",
+        "data": {
+          "scan_interval": "Abfrageintervall"
+        },
+        "data_description": {
+          "scan_interval": "Sekunden zwischen zwei Abfragen (30 bis 3600). Der Kessel nimmt von allen Programmen zusammen höchstens alle 2,5 Sekunden eine Anfrage an."
+        }
+      }
+    }
+  },
+  "device": {
+    "boiler": {
+      "name": "Kessel {index}"
+    },
+    "heating_circuit": {
+      "name": "Heizkreis {index}"
+    },
+    "buffer": {
+      "name": "Puffer {index}"
+    },
+    "hot_water": {
+      "name": "Warmwasser {index}"
+    },
+    "circulation": {
+      "name": "Zirkulation {index}"
+    },
+    "solar": {
+      "name": "Solar {index}"
+    },
+    "section": {
+      "name": "Bereich {section}"
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "burner": {
+        "name": "Brenner"
+      },
+      "pump": {
+        "name": "Pumpe"
+      }
+    },
+    "sensor": {
+      "outdoor_temperature": {
+        "name": "Außentemperatur"
+      },
+      "weather_temperature": {
+        "name": "Temperatur Wetterdienst"
+      },
+      "cloud_cover": {
+        "name": "Bewölkung"
+      },
+      "boiler_temperature": {
+        "name": "Kesseltemperatur"
+      },
+      "boiler_target_temperature": {
+        "name": "Kessel-Solltemperatur"
+      },
+      "combustion_chamber_temperature": {
+        "name": "Feuerraumtemperatur"
+      },
+      "combustion_chamber_target_temperature": {
+        "name": "Feuerraum-Solltemperatur"
+      },
+      "external_boiler_sensor": {
+        "name": "Externer Kesselfühler"
+      },
+      "modulation": {
+        "name": "Modulation"
+      },
+      "flue_gas_fan": {
+        "name": "Saugzuggebläse"
+      },
+      "combustion_air": {
+        "name": "Verbrennungsluft"
+      },
+      "boiler_pump": {
+        "name": "Kesselpumpe"
+      },
+      "burner_phase": {
+        "name": "Brennerphase",
+        "state": {
+          "continuous_run": "Dauerlauf",
+          "start": "Start",
+          "ignition": "Zündung",
+          "soft_start": "Softstart",
+          "full_burn": "Leistungsbrand",
+          "burn_out": "Nachlauf",
+          "off": "Aus",
+          "suction": "Saugen",
+          "ash_warning": "Asche-Warnung",
+          "pellet_warning": "Pellet-Warnung",
+          "pellet_switch": "Pelletumschaltung",
+          "fault": "Störung",
+          "calibration": "Einmessen"
+        }
+      },
+      "status": {
+        "name": "Status"
+      },
+      "burner_starts": {
+        "name": "Brennerstarts"
+      },
+      "burner_hours": {
+        "name": "Brennerstunden"
+      },
+      "average_runtime": {
+        "name": "Mittlere Brennerlaufzeit"
+      },
+      "flow_temperature": {
+        "name": "Vorlauftemperatur"
+      },
+      "flow_target_temperature": {
+        "name": "Vorlauf-Solltemperatur"
+      },
+      "room_temperature": {
+        "name": "Raumtemperatur"
+      },
+      "room_target_temperature": {
+        "name": "Raum-Solltemperatur"
+      },
+      "buffer_top_temperature": {
+        "name": "Temperatur oben"
+      },
+      "buffer_middle_temperature": {
+        "name": "Temperatur Mitte"
+      },
+      "buffer_top_target_temperature": {
+        "name": "Solltemperatur oben"
+      },
+      "buffer_middle_target_temperature": {
+        "name": "Solltemperatur Mitte"
+      },
+      "buffer_pump": {
+        "name": "Pufferpumpe"
+      },
+      "hot_water_temperature": {
+        "name": "Warmwassertemperatur"
+      },
+      "hot_water_lower_temperature": {
+        "name": "Warmwassertemperatur unten"
+      },
+      "hot_water_target_temperature": {
+        "name": "Warmwasser-Solltemperatur"
+      },
+      "circulation_return_temperature": {
+        "name": "Rücklauftemperatur"
+      },
+      "circulation_release_temperature": {
+        "name": "Freigabetemperatur"
+      }
+    }
+  },
+  "exceptions": {
+    "invalid_auth": {
+      "message": "Der Kessel hat das JSON-Passwort abgelehnt."
+    },
+    "update_failed": {
+      "message": "Lesen des Kessels fehlgeschlagen: {error}"
     }
   }
 }

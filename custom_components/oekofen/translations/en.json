@@ -14,10 +14,206 @@
           "port": "Port of the JSON interface, usually 4321.",
           "password": "Password of the JSON interface. This is not the password of the ÖkoFEN web portal."
         }
+      },
+      "reauth_confirm": {
+        "title": "New JSON password",
+        "description": "The boiler rejected the JSON password. Enter the current password of the JSON interface.",
+        "data": {
+          "password": "JSON password"
+        },
+        "data_description": {
+          "password": "Password of the JSON interface. This is not the password of the ÖkoFEN web portal."
+        }
+      },
+      "reconfigure": {
+        "title": "Change connection",
+        "description": "Change the address or port of the boiler. The JSON password stays the same.",
+        "data": {
+          "host": "Host",
+          "port": "JSON port"
+        },
+        "data_description": {
+          "host": "IP address or host name of the boiler in your network.",
+          "port": "Port of the JSON interface, usually 4321."
+        }
       }
     },
+    "error": {
+      "cannot_connect": "The boiler cannot be reached. Check host, port and that the JSON interface is enabled.",
+      "invalid_auth": "The boiler did not return data. Check the JSON password.",
+      "invalid_answer": "The boiler returned an answer that could not be read.",
+      "no_boiler": "The answer contains no boiler data (section pe1 missing).",
+      "unknown": "Unexpected error, see the log.",
+      "busy": "The boiler is busy (another program is reading it). Try again in a few seconds."
+    },
     "abort": {
-      "already_configured": "This boiler is already configured."
+      "already_configured": "This boiler is already configured.",
+      "reauth_successful": "The JSON password was updated.",
+      "reconfigure_successful": "The connection was updated."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Options",
+        "data": {
+          "scan_interval": "Polling interval"
+        },
+        "data_description": {
+          "scan_interval": "Seconds between two requests (30 to 3600). The boiler accepts at most one request every 2.5 seconds from all clients together."
+        }
+      }
+    }
+  },
+  "device": {
+    "boiler": {
+      "name": "Boiler {index}"
+    },
+    "heating_circuit": {
+      "name": "Heating circuit {index}"
+    },
+    "buffer": {
+      "name": "Buffer {index}"
+    },
+    "hot_water": {
+      "name": "Hot water {index}"
+    },
+    "circulation": {
+      "name": "Circulation {index}"
+    },
+    "solar": {
+      "name": "Solar {index}"
+    },
+    "section": {
+      "name": "Section {section}"
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "burner": {
+        "name": "Burner"
+      },
+      "pump": {
+        "name": "Pump"
+      }
+    },
+    "sensor": {
+      "outdoor_temperature": {
+        "name": "Outdoor temperature"
+      },
+      "weather_temperature": {
+        "name": "Weather service temperature"
+      },
+      "cloud_cover": {
+        "name": "Cloud cover"
+      },
+      "boiler_temperature": {
+        "name": "Boiler temperature"
+      },
+      "boiler_target_temperature": {
+        "name": "Boiler target temperature"
+      },
+      "combustion_chamber_temperature": {
+        "name": "Combustion chamber temperature"
+      },
+      "combustion_chamber_target_temperature": {
+        "name": "Combustion chamber target temperature"
+      },
+      "external_boiler_sensor": {
+        "name": "External boiler sensor"
+      },
+      "modulation": {
+        "name": "Modulation"
+      },
+      "flue_gas_fan": {
+        "name": "Flue gas fan"
+      },
+      "combustion_air": {
+        "name": "Combustion air"
+      },
+      "boiler_pump": {
+        "name": "Boiler pump"
+      },
+      "burner_phase": {
+        "name": "Burner phase",
+        "state": {
+          "continuous_run": "Continuous run",
+          "start": "Start",
+          "ignition": "Ignition",
+          "soft_start": "Soft start",
+          "full_burn": "Full burn",
+          "burn_out": "Burn-out",
+          "off": "Off",
+          "suction": "Pellet suction",
+          "ash_warning": "Ash warning",
+          "pellet_warning": "Pellet warning",
+          "pellet_switch": "Pellet switch",
+          "fault": "Fault",
+          "calibration": "Calibration"
+        }
+      },
+      "status": {
+        "name": "Status"
+      },
+      "burner_starts": {
+        "name": "Burner starts"
+      },
+      "burner_hours": {
+        "name": "Burner hours"
+      },
+      "average_runtime": {
+        "name": "Average burner runtime"
+      },
+      "flow_temperature": {
+        "name": "Flow temperature"
+      },
+      "flow_target_temperature": {
+        "name": "Flow target temperature"
+      },
+      "room_temperature": {
+        "name": "Room temperature"
+      },
+      "room_target_temperature": {
+        "name": "Room target temperature"
+      },
+      "buffer_top_temperature": {
+        "name": "Top temperature"
+      },
+      "buffer_middle_temperature": {
+        "name": "Middle temperature"
+      },
+      "buffer_top_target_temperature": {
+        "name": "Top target temperature"
+      },
+      "buffer_middle_target_temperature": {
+        "name": "Middle target temperature"
+      },
+      "buffer_pump": {
+        "name": "Buffer pump"
+      },
+      "hot_water_temperature": {
+        "name": "Hot water temperature"
+      },
+      "hot_water_lower_temperature": {
+        "name": "Lower hot water temperature"
+      },
+      "hot_water_target_temperature": {
+        "name": "Hot water target temperature"
+      },
+      "circulation_return_temperature": {
+        "name": "Return temperature"
+      },
+      "circulation_release_temperature": {
+        "name": "Release temperature"
+      }
+    }
+  },
+  "exceptions": {
+    "invalid_auth": {
+      "message": "The boiler rejected the JSON password."
+    },
+    "update_failed": {
+      "message": "Reading the boiler failed: {error}"
     }
   }
 }

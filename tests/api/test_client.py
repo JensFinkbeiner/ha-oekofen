@@ -159,7 +159,7 @@ async def test_errors_never_leak_password(
     assert expected in str(info.value)
     assert PASSWORD not in str(info.value)
     assert info.value.__cause__ is None
-    assert info.value.__suppress_context__ or answer == 500
+    assert info.value.__context__ is None
 
 
 async def test_help_page_is_auth_error(

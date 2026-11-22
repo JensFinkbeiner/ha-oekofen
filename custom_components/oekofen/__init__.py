@@ -1,31 +1,39 @@
-"""The ÖkoFEN Pellematic integration.
-
-Milestone 0.1.0: skeleton only. The config entry loads, but no platforms are
-set up yet. The protocol client follows in 0.2.0, entities in 0.3.0.
-"""
+"""The ÖkoFEN Pellematic integration (read-only, local JSON interface)."""
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-
-from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import Platform
+from homeassistant.config_entries import ConfigEntryState
+from homeassistant.const import CONF_HOST, CONF_PASSWORD, CONF_PORT, Platform
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers import device_registry as dr
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
-PLATFORMS: list[Platform] = []
+from .api import OekofenClient
+from .coordinator import OekofenConfigEntry, OekofenCoordinator, OekofenRuntimeData
+from .entity import (
+    async_register_main_device,
+    main_device_identifier,
+    section_device_identifier,
+)
 
-
-@dataclass
-class OekofenRuntimeData:
-    """Runtime objects of one config entry (coordinator follows in 0.3.0)."""
-
-
-type OekofenConfigEntry = ConfigEntry[OekofenRuntimeData]
+PLATFORMS: list[Platform] = [Platform.BINARY_SENSOR, Platform.SENSOR]
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: OekofenConfigEntry) -> bool:
     """Set up ÖkoFEN Pellematic from a config entry."""
-    entry.runtime_data = OekofenRuntimeData()
+    client = OekofenClient(
+        entry.data[CONF_HOST],
+        entry.data[CONF_PORT],
+        entry.data[CONF_PASSWORD],
+        async_get_clientsession(hass),
+    )
+    coordinator = OekofenCoordinator(hass, entry, client)
+    await coordinator.async_config_entry_first_refresh()
+    entry.runtime_data = OekofenRuntimeData(
+        client=client,
+        coordinator=coordinator,
+        main_device_id=async_register_main_device(hass, entry, coordinator.data),
+    )
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     return True
 
@@ -33,3 +41,18 @@ async def async_setup_entry(hass: HomeAssistant, entry: OekofenConfigEntry) -> b
 async def async_unload_entry(hass: HomeAssistant, entry: OekofenConfigEntry) -> bool:
     """Unload a config entry."""
     return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+
+
+async def async_remove_config_entry_device(
+    hass: HomeAssistant, entry: OekofenConfigEntry, device_entry: dr.AnyDeviceEntry
+) -> bool:
+    """Allow removing a child device whose section the boiler no longer sends."""
+    if main_device_identifier(entry) in device_entry.identifiers:
+        return False
+    if entry.state is not ConfigEntryState.LOADED:
+        return False
+    present = {
+        section_device_identifier(entry, section)
+        for section in entry.runtime_data.coordinator.data.sections
+    }
+    return not present & device_entry.identifiers

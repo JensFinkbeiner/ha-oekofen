@@ -1,0 +1,53 @@
+{
+  "entity": {
+    "binary_sensor": {
+      "burner": {
+        "default": "mdi:fire-off",
+        "state": {
+          "on": "mdi:fire"
+        }
+      },
+      "pump": {
+        "default": "mdi:pump-off",
+        "state": {
+          "on": "mdi:pump"
+        }
+      }
+    },
+    "sensor": {
+      "burner_phase": {
+        "default": "mdi:fire-circle"
+      },
+      "status": {
+        "default": "mdi:information-outline"
+      },
+      "modulation": {
+        "default": "mdi:gauge"
+      },
+      "flue_gas_fan": {
+        "default": "mdi:fan"
+      },
+      "combustion_air": {
+        "default": "mdi:weather-windy"
+      },
+      "boiler_pump": {
+        "default": "mdi:pump"
+      },
+      "buffer_pump": {
+        "default": "mdi:pump"
+      },
+      "burner_starts": {
+        "default": "mdi:counter"
+      },
+      "cloud_cover": {
+        "default": "mdi:weather-cloudy"
+      },
+      "burner_hours": {
+        "default": "mdi:timer-outline"
+      },
+      "average_runtime": {
+        "default": "mdi:timer-sand"
+      }
+    }
+  }
+}

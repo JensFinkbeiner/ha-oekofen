@@ -4,6 +4,30 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/). Versionssc
 MAJOR wird nur auf ausdrücklichen Wunsch erhöht, MINOR bei neuen Funktionen, PATCH bei Fehlerbehebungen.
 Reine Dokumentation und Refactoring ändern die Version nicht.
 
+## [0.3.0] - 2026-11-22
+
+### Hinzugefügt
+- Einrichtung mit Verbindungstest, Reauth bei geändertem JSON-Passwort, „Neu konfigurieren“ für Host und Port, Option Abfrageintervall (30 bis 3600 s).
+- Coordinator: eine Anfrage pro Intervall, Metadaten einmal täglich. Fehler werden als übersetzte Meldung gezeigt, ein falsches Passwort startet die Reauth.
+- Geräte: Regler als Hauptgerät (Modell aus `pe1.L_type`), Heizkreis, Puffer, Warmwasser und Zirkulation als Untergeräte (`ChildDeviceInfo`). Neue Bereiche kommen ohne Neustart dazu, nicht mehr gemeldete Untergeräte lassen sich löschen.
+- 34 Sensoren und 4 Binärsensoren, Namen auf Deutsch und Englisch, Icons über `icons.json`. Selten gebrauchte Werte sind standardmäßig deaktiviert.
+
+### Behoben (aus dem Review vor dem Release)
+- Eine leere oder fremde Antwort (zum Beispiel HTML) gilt nicht mehr als falsches Passwort. Nur die echte Hilfeseite des Kessels („Oekofen JSON Interface … usage:“) startet die Reauth. Vorher hätte ein kurzer Aussetzer das Abfragen dauerhaft gestoppt.
+- Das Passwort wird in der URL kodiert (`/`, `?`, `#`, `%`, Leerzeichen). IPv6-Adressen werden in eckige Klammern gesetzt.
+- Verbindungsfehler tragen die aiohttp-Exception nicht mehr als `__context__` mit. Deren Text enthält die URL und damit das Passwort.
+- Fehlen die Metadaten, wird das als Fehler gemeldet, statt die Werte unskaliert zu übernehmen (sonst 10-fach zu hohe Temperaturen).
+- Prozentwerte: Sentinel-Werte und Werte außerhalb von 0 bis 100 erscheinen als „unbekannt“.
+- Raumtemperatur ohne Raumfühler (0) erscheint als „unbekannt“ statt 0 °C.
+- Ein Gerät lässt sich nicht löschen, solange die Integration nicht geladen ist. Vorher kam ein AttributeError.
+- Nach einem Fehler im Einrichtungsformular wird das Passwort nicht ins Formular zurückgegeben.
+- Eigene Fehlermeldung „Kessel ausgelastet“, wenn ein anderes Programm den Kessel gerade abfragt.
+
+### Geprüft
+- 22.11.2026: 83 Tests bestanden (76 Snapshots), 100 % Branch-Coverage, mypy strict ohne Befund.
+- In der Testinstanz am echten Kessel wurden 38 Entitäten angelegt (25 aktiv), ohne Fehler im Log.
+- Ein Subagent hat den Code gegen die Quality-Scale-Regeln geprüft. Die kritischen und wichtigen Funde sind behoben, der Rest steht in `PLAN.md`.
+
 ## [0.2.0] - 2026-11-22
 
 ### Hinzugefügt

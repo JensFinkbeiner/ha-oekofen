@@ -280,6 +280,23 @@ Remote: GitHub, öffentliches Repository (Name zum Beispiel `ha-oekofen`), Branc
      - Wichtig: aiohttp entfernt das `?` von `all?`, deshalb wird `all??` abgefragt (am Kessel geprüft, gleiche Antwort).
 3. **0.3.0 Einrichtung und Grundsensoren:** Config Flow (user, reauth, reconfigure, options), Coordinator, Geräte und Untergeräte, Sensoren und Binärsensoren, Übersetzungen, Icons.
    - Abnahme: Snapshot-Tests grün. In der Testinstanz stimmen die Werte mit der Anzeige am Touch bzw. im Pellet-Monitor überein (Stichprobe von 10 Werten, Jens prüft).
+   - Tiefencheck vor dem Start (22.11.2026):
+     - Rohdaten: die anonymisierten Fixtures aus 0.2.0 und die Enum-Texte des Kessels. Kesselphase `pe1.L_state`: 0 Dauerlauf bis 12 Einmessen, 97–101 Aus. Kesseltyp `pe1.L_type`: 9 COMPACT.
+     - Unabhängige Prüfung:
+       - syrupy-Snapshots aller Entitäten (Einheit, Klasse, Gerät).
+       - hassfest prüft Übersetzungen und Manifest.
+       - Config Flow zu 100 % getestet.
+       - Jens vergleicht 10 Werte in der Testinstanz mit dem Touch bzw. dem Pellet-Monitor.
+       - Zusätzlich prüft ein Subagent den Code gegen die Quality-Scale-Regeln. Das ist ergänzend und zählt nicht als unabhängige Prüfung.
+   - Stand 22.11.2026:
+     - 83 Tests grün, 100 % Coverage. Testinstanz am echten Kessel mit 38 Entitäten ohne Fehler.
+     - Review umgesetzt (siehe CHANGELOG 0.3.0).
+     - **Offen für die Abnahme:** Jens vergleicht 10 Werte mit dem Touch bzw. dem Pellet-Monitor.
+   - Aus dem Review übernommen in 0.4.0:
+     - Modell des Kessels nach jeder Metadaten-Aktualisierung im Geräteregister nachziehen.
+     - Einheit aus den Metadaten gegen die erwartete Einheit prüfen und bei Abweichung warnen.
+     - Bei den Zählern `L_starts` und `L_runtime` einen kleineren Wert als den letzten verwerfen, außer bei einem echten Reset.
+     - Firmware als `sw_version` aus dem Kopf der Hilfeseite („Oekofen JSON Interface V4.00“) lesen, einmal beim Start.
 4. **0.4.0 Störung und Diagnose:** Störungs-Binärsensor, Fehlertext, Repair-Hinweis, Diagnose-Download, robuste Abfrage mit Backoff.
    - Abnahme: Tests mit einer Störungs-Fixture. Die Diagnose enthält nachweislich weder Passwort, Host noch Ort (Test).
 5. **0.5.0 Brenner-Statistik und Energie:** `burner.py`, Tageswerte mit Restore, Energie- und Pelletsensor mit Optionen.

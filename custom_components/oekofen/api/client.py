@@ -7,11 +7,16 @@ from __future__ import annotations
 
 import asyncio
 import time
+from urllib.parse import quote
 
 import aiohttp
 
 from .decode import build_data, decode_bytes, parse_json, parse_meta
-from .exceptions import OekofenBusyError, OekofenConnectionError
+from .exceptions import (
+    OekofenBusyError,
+    OekofenConnectionError,
+    OekofenParseError,
+)
 from .models import FieldMeta, OekofenData
 
 # The boiler rejects requests closer than 2.5 s, counted over all clients.
@@ -42,7 +47,10 @@ class OekofenClient:
         timeout: float = TIMEOUT,
     ) -> None:
         """Initialize the client. The session is owned by the caller."""
-        self._base = f"http://{host}:{port}/{password}"
+        # The password is a path segment: quote "/", "?", "#", "%" and spaces.
+        # IPv6 literals need brackets.
+        url_host = f"[{host}]" if ":" in host and not host.startswith("[") else host
+        self._base = f"http://{url_host}:{port}/{quote(password, safe='')}"
         self._password = password
         self._session = session
         self._request_gap = request_gap
@@ -66,8 +74,12 @@ class OekofenClient:
         """
         if self._meta is None or refresh_metadata:
             raw = parse_json(decode_bytes(await self._request(META_PATH)))
-            self._meta = parse_meta(raw)
-            return build_data(raw, self._meta)
+            meta = parse_meta(raw)
+            if not any(meta.values()):
+                # Without factors temperatures would be 10 times too high.
+                raise OekofenParseError("The boiler returned no field descriptions")
+            self._meta = meta
+            return build_data(raw, meta)
         raw = parse_json(decode_bytes(await self._request(DATA_PATH)))
         return build_data(raw, self._meta)
 
@@ -85,6 +97,12 @@ class OekofenClient:
             wait = self._request_gap - (time.monotonic() - self._last_request)
             if wait > 0:
                 await asyncio.sleep(wait)
+        # aiohttp messages contain the URL and thus the password. The error is
+        # raised outside the except block, so the original exception is neither
+        # __cause__ nor __context__ of ours.
+        error: str | None = None
+        body = b""
+        status = 0
         try:
             async with self._session.get(
                 f"{self._base}/{path}", timeout=self._timeout
@@ -92,16 +110,13 @@ class OekofenClient:
                 body = await resp.read()
                 status = resp.status
         except TimeoutError:
-            raise OekofenConnectionError(
-                "Timeout while talking to the boiler"
-            ) from None
+            error = "Timeout while talking to the boiler"
         except aiohttp.ClientError as err:
-            # aiohttp messages can contain the URL, which contains the password.
-            raise OekofenConnectionError(
-                f"Cannot connect to the boiler ({type(err).__name__})"
-            ) from None
+            error = f"Cannot connect to the boiler ({type(err).__name__})"
         finally:
             self._last_request = time.monotonic()
+        if error is not None:
+            raise OekofenConnectionError(error)
         if status == 401 or b"Wait at least" in body[:200]:
             raise OekofenBusyError("The boiler is busy (rate limit)")
         if status != 200:

@@ -18,7 +18,8 @@ from .exceptions import OekofenAuthError, OekofenParseError
 from .models import FieldMeta, OekofenData, OekofenFault, Value
 
 SENTINELS = frozenset({-32768, 32765, 32766, 32767})
-TEMPERATURE_UNITS = frozenset({"°C", "K"})
+# Units whose fields use the sentinel values for "no sensor".
+MEASURED_UNITS = frozenset({"°C", "K", "%"})
 
 # Privacy: never keep the location of the weather source or the forecast texts.
 DROPPED_SECTIONS = frozenset({"forecast"})
@@ -42,14 +43,22 @@ def decode_bytes(raw: bytes) -> str:
     return text.replace("Â°", "°")
 
 
+def is_help_page(text: str) -> bool:
+    """Return True for the help page ("Oekofen JSON Interface ... usage:")."""
+    return text.startswith("Oekofen JSON Interface") or "usage:" in text[:400].lower()
+
+
 def parse_json(text: str) -> dict[str, Any]:
     """Parse the JSON text, repairing the known firmware bugs."""
     stripped = text.strip()
     if not stripped.startswith("{"):
-        # Wrong password or path: the boiler answers with a plain text help page.
-        raise OekofenAuthError(
-            "The boiler did not return data (check the JSON password)"
-        )
+        if is_help_page(stripped):
+            # Wrong password or path: the boiler answers with its help page.
+            raise OekofenAuthError(
+                "The boiler did not return data (check the JSON password)"
+            )
+        # Empty body, HTML error page, restart of the touch panel ...: transient.
+        raise OekofenParseError("The boiler returned no JSON data")
     repaired = _BROKEN_KEY_RE.sub(r'"\1":\2', stripped)
     try:
         data: dict[str, Any] = json.loads(repaired, strict=False)
@@ -120,7 +129,7 @@ def normalize_scalar(value: Any) -> Value:
 def _scale(value: Value, meta: FieldMeta | None) -> Value:
     if meta is None or isinstance(value, bool) or not isinstance(value, int | float):
         return value
-    measured = meta.factor != 1 or meta.unit in TEMPERATURE_UNITS
+    measured = meta.factor != 1 or meta.unit in MEASURED_UNITS
     if measured and value in SENTINELS:
         return None
     if meta.factor == 1:

@@ -11,6 +11,8 @@ import pytest
 FIXTURES = Path(__file__).resolve().parent / "fixtures"
 ALLOWED_PLACEHOLDERS = {"Musterstadt", "Testwetter", "Testname", "Testtext"}
 FREE_TEXT_KEYS = {"L_location", "L_source", "name"}
+# RFC 5737 documentation networks.
+DOC_NETS = ("192.0.2.", "198.51.100.", "203.0.113.")
 
 
 def _load(path: Path) -> dict[str, dict[str, object]]:
@@ -24,9 +26,9 @@ def _load(path: Path) -> dict[str, dict[str, object]]:
 @pytest.mark.parametrize("path", sorted(FIXTURES.glob("*.json")), ids=lambda p: p.name)
 def test_fixture_has_no_private_text(path: Path) -> None:
     text = path.read_bytes().decode("latin-1")
-    assert not re.search(r"\b(?:10|172|192\.168)\.\d+\.\d+", text), (
-        "IP address in fixture"
-    )
+    for ip in re.findall(r"\b\d{1,3}(?:\.\d{1,3}){3}\b", text):
+        assert ip.startswith(DOC_NETS), f"IP address {ip} in fixture"
+    assert not re.search(r'"(?:lat|lon|latitude|longitude|serial)', text, re.I)
     for section, body in _load(path).items():
         for key, value in body.items():
             val = value.get("val") if isinstance(value, dict) else value

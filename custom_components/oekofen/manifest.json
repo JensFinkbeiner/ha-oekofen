@@ -1,7 +1,12 @@
 {
   "domain": "oekofen",
   "name": "ÖkoFEN Pellematic",
-  "codeowners": ["@JensFinkbeiner"],
+  "categories": [
+    "climate.thermostats_heating"
+  ],
+  "codeowners": [
+    "@JensFinkbeiner"
+  ],
   "config_flow": true,
   "documentation": "https://github.com/JensFinkbeiner/ha-oekofen",
   "integration_type": "device",

@@ -288,7 +288,11 @@ Remote: GitHub, öffentliches Repository (Name zum Beispiel `ha-oekofen`), Branc
 
 - **Firmware-Version des Touch:** Steht im Menü oder ergibt sich aus `all?`. Davon hängen Datentypen und Eigenheiten ab. Klärung in 0.2.0 mit den Rohdaten.
 - **Firmware-Update am Kessel:** Steht eins an? Dann vorher Rohdaten sichern, um die Unterschiede zu sehen.
-- **Unbestätigte Angaben aus der Recherche:** Python 3.14 als Mindestversion, das Testpaket `pytest-homeassistant`, die Doku unter contributors.home-assistant.io. Bestätigt ist bisher nur der eingebaute Marketplace ab 2026.11, durch eigene Nutzung. Klärung in 0.1.0 anhand der installierten HA-Version.
+- ~~Unbestätigte Angaben aus der Recherche~~ Geklärt am 22.11.2026:
+  - HA 2026.11.2 verlangt Python ≥ 3.14.2 (PyPI, bestätigt).
+  - Testpaket ist `pytest-homeassistant-custom-component` 0.13.375. Es pinnt HA 2026.10.4 und läuft. `pytest-homeassistant` war auf PyPI nicht prüfbar und wird nicht genutzt.
+  - Schemas mit `probatio` statt `voluptuous`, wie im Core (mypy verlangt das).
+  - Die HACS-Action verlangt GitHub-Topics und `categories` im Manifest. Beides ist gesetzt.
 - **IP und Port des Kessels:** Stehen in der `.env` des Pellet-Monitors. Jens trägt sie selbst im Config Flow ein, Claude liest die `.env` nicht.
 - **Repo-Name auf GitHub und GitHub-Konto:** Ist `gh` angemeldet?
 - **Pellet-Monitor:** Bleibt das Intervall von 60 s? Wenn er später wegfällt, entfällt auch die Kollisionsgefahr.

@@ -316,7 +316,7 @@ Remote: GitHub, öffentliches Repository (Name zum Beispiel `ha-oekofen`), Branc
    - Abnahme: Tests der Grenzfälle grün. Das Vergleichsskript gegen den Pellet-Monitor über 3 Tage in der Testinstanz erfüllt die Toleranzen.
    - Stand 22.11.2026:
      - 107 Tests grün, 100 % Coverage, `tools/compare_monitor.py` fertig.
-     - **Offen für die Abnahme:** 3 vollständige Tage in der Testinstanz, danach den Abgleich mit einer frischen Kopie der Pellet-Monitor-Datenbank laufen lassen.
+     - Entscheidung Jens, 22.11.2026: Der Abgleich läuft nicht in der Testinstanz, denn der Laptop läuft nicht durchgehend. Er läuft im Echtbetrieb (0.6.0), mit einer Kopie der HA-Datenbank und der Pellet-Monitor-Datenbank. Die Abnahme von 0.5.0 erfolgt dort zusammen mit 0.6.0. Release v0.5.0 auf GitHub für die Installation über den Marketplace.
 6. **0.6.0 Echtbetrieb:** Release über GitHub, Installation über den Marketplace an der echten HA. Energie-Dashboard und Push-Automation für Störungen eingerichtet.
    - Abnahme: 7 Tage Betrieb mit den Kennzahlen aus Tiefencheck 4.
 7. **1.0.0:** `quality_scale.yaml` vollständig (done oder exempt mit Begründung), README fertig, alle Prüfungen aus Tiefencheck 4 bestanden, Ergebnis im CHANGELOG.

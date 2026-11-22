@@ -319,6 +319,10 @@ Remote: GitHub, öffentliches Repository (Name zum Beispiel `ha-oekofen`), Branc
      - Entscheidung Jens, 22.11.2026: Der Abgleich läuft nicht in der Testinstanz, denn der Laptop läuft nicht durchgehend. Er läuft im Echtbetrieb (0.6.0), mit einer Kopie der HA-Datenbank und der Pellet-Monitor-Datenbank. Die Abnahme von 0.5.0 erfolgt dort zusammen mit 0.6.0. Release v0.5.0 auf GitHub für die Installation über den Marketplace.
 6. **0.6.0 Echtbetrieb:** Release über GitHub, Installation über den Marketplace an der echten HA. Energie-Dashboard und Push-Automation für Störungen eingerichtet.
    - Abnahme: 7 Tage Betrieb mit den Kennzahlen aus Tiefencheck 4.
+   - Stand 22.11.2026: Release v0.5.0 veröffentlicht. Jens hat die Integration über den Marketplace an der echten HA installiert und eingerichtet. Damit beginnt der Echtbetrieb.
+     - Abgleich mit dem Pellet-Monitor (Abnahme 0.5.0): frühestens am 26.11.2026, nach 3 vollständigen Tagen (23. bis 25.11.).
+     - 7-Tage-Abnahme 0.6.0: frühestens am 30.11.2026.
+     - Noch offen: Energie-Dashboard (Pelletenergie als Gasverbrauch), Push-Automation bei Störung, Testinstanz stoppen (sonst fragen drei Programme den Kessel ab).
 7. **1.0.0:** `quality_scale.yaml` vollständig (done oder exempt mit Begründung), README fertig, alle Prüfungen aus Tiefencheck 4 bestanden, Ergebnis im CHANGELOG.
 
 ## Später

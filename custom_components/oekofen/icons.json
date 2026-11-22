@@ -12,6 +12,12 @@
         "state": {
           "on": "mdi:pump"
         }
+      },
+      "fault": {
+        "default": "mdi:alert-circle-check-outline",
+        "state": {
+          "on": "mdi:alert-circle"
+        }
       }
     },
     "sensor": {
@@ -47,6 +53,9 @@
       },
       "average_runtime": {
         "default": "mdi:timer-sand"
+      },
+      "fault_message": {
+        "default": "mdi:alert-outline"
       }
     }
   }

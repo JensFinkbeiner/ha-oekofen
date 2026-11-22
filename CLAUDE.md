@@ -20,6 +20,9 @@ Custom Integration `oekofen` für Home Assistant. Sie liest die eigene ÖkoFEN P
   - Unload.
   - `async_remove_config_entry_device`: nur Untergeräte, deren Bereich fehlt, und nur, wenn die Integration geladen ist.
 - `custom_components/oekofen/coordinator.py`: `OekofenRuntimeData` (Client, Coordinator, `main_device_id`), Typ `OekofenConfigEntry`. `OekofenCoordinator` holt alle 60 s (Option) die Daten, die Metadaten einmal täglich. `OekofenAuthError` wird zu `ConfigEntryAuthFailed` (Reauth), andere Fehler zu `UpdateFailed` mit `translation_key`.
+  - Robust: Ein einzelnes `OekofenBusyError` behält die letzten Daten. Bei Dauerausfall verdoppelt sich das Intervall bis `MAX_BACKOFF` (10 min) und springt nach Erfolg zurück.
+  - Repair-Issue `boiler_fault_<entry_id>` (`fault_issue_id`), solange `data.faults` nicht leer ist. Es wird beim Unload gelöscht.
+  - `boiler_model` aktualisiert das Modell nach der täglichen Metadaten-Abfrage.
 - `custom_components/oekofen/entity.py`:
   - Geräte: `pe1`, `system` und `weather` liegen auf dem Hauptgerät. `hk`, `pu`, `ww`, `circ` und weitere `pe` werden Untergeräte.
   - **HA ≥ 2026.10:** `ChildDeviceInfo(parent_device_id=...)` statt `via_device`. Das Hauptgerät wird deshalb vorher mit `async_register_main_device` angelegt. Entity-IDs der Untergeräte beginnen mit dem Namen des Hauptgeräts, zum Beispiel `sensor.okofen_pellematic_heating_circuit_1_…`. Im Registry sucht man sie mit `async_get_device_by_identifier` bzw. `async_get_child_device_by_identifier`, `async_get_device` ist deprecated.
@@ -32,6 +35,10 @@ Custom Integration `oekofen` für Home Assistant. Sie liest die eigene ÖkoFEN P
 - `custom_components/oekofen/config_flow.py`: Schritte `user`, `reauth_confirm` und `reconfigure` (alle mit Verbindungstest `_async_test_connection`) sowie die Option Abfrageintervall (`OptionsFlowWithReload`). Doppelte Einrichtung wird über `_async_abort_entries_match` auf Host und Port erkannt, weil der Kessel keine Seriennummer liefert. Schemas mit `probatio`.
 - `custom_components/oekofen/const.py`: Domain, Standardport 4321, Intervalle (Standard 60 s, 30 bis 3600 s), `METADATA_REFRESH`, `BURNING_STATES`, `BURNER_PHASES`.
 - `custom_components/oekofen/icons.json`: Icons pro `translation_key`.
+- `custom_components/oekofen/diagnostics.py`: Diagnose. Geschwärzt sind `host`, `password`, `name`, `L_source` und `L_location`. Neue Freitext-Keys hier ergänzen, der Snapshot `tests/snapshots/test_diagnostics.ambr` zeigt das Ergebnis.
+- Firmware: `OekofenClient.async_get_firmware` liest den Kopf der Hilfeseite (Pfad `help`), einmal beim Setup, als `sw_version`. Ein Fehler blockiert das Setup nie.
+- `entity.unit_matches`: Legt eine Entität nicht an, wenn die Einheit in den Metadaten nicht zur erwarteten passt. TOTAL_INCREASING-Sensoren laufen nie rückwärts (`OekofenSensor._last_total`).
+- Störung: Binärsensor `fault` und Sensor `fault_message` (mit `data_fn` bzw. `attributes_fn` statt eines einzelnen Keys).
 - `custom_components/oekofen/api/`: Protokoll-Client. **Keine HA-Imports**, damit das Paket später als PyPI-Bibliothek herausgelöst werden kann.
   - `client.py`: `OekofenClient`, das einzige Modul mit Netzwerkzugriff (Egress). Metadaten über `META_PATH = "all??"`, weil yarl das `?` von `all?` entfernt. Daten über `all`. Sperre plus 3 s Abstand, eine Wiederholung bei 401. Exceptions mit `from None`, damit die URL mit dem Passwort nie im Traceback steht.
   - `decode.py`: Dekodierung, JSON-Reparatur, `parse_meta`, `build_data` (Faktoren, Sentinels, V3-Strings), `parse_faults`. `DROPPED_SECTIONS` und `DROPPED_KEYS` regeln den Datenschutz.

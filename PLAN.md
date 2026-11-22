@@ -299,6 +299,19 @@ Remote: GitHub, öffentliches Repository (Name zum Beispiel `ha-oekofen`), Branc
      - Firmware als `sw_version` aus dem Kopf der Hilfeseite („Oekofen JSON Interface V4.00“) lesen, einmal beim Start.
 4. **0.4.0 Störung und Diagnose:** Störungs-Binärsensor, Fehlertext, Repair-Hinweis, Diagnose-Download, robuste Abfrage mit Backoff.
    - Abnahme: Tests mit einer Störungs-Fixture. Die Diagnose enthält nachweislich weder Passwort, Host noch Ort (Test).
+   - Tiefencheck vor dem Start (22.11.2026):
+     - Rohdaten: `error` ist am eigenen Kessel derzeit leer. Die Störungs-Fixture ist deshalb erfunden, im Format aus der Recherche (`"Datum|Text [Code]"`) und mit `system.L_errors` > 0.
+     - Die Firmware-Version steht nur im Kopf der Hilfeseite („Oekofen JSON Interface V4.00“, am Kessel geprüft). Sie wird einmal beim Start gelesen.
+     - Unabhängige Prüfung:
+       - Tests: Repair-Issue erscheint und verschwindet.
+       - Snapshot der Diagnose, mit Test auf Passwort, Host und Ort.
+       - Backoff bei Dauerausfall, Toleranz bei einzelner Kollision mit dem Pellet-Monitor.
+       - In der Testinstanz den Diagnose-Download einmal von Jens öffnen lassen. Er prüft, dass darin keine IP und kein Passwort steht.
+   - Stand 22.11.2026:
+     - 97 Tests grün, 100 % Coverage.
+     - Testinstanz am echten Kessel: 40 Entitäten, Firmware V4.00b als Softwareversion, keine Fehler.
+     - Alle Punkte aus dem Review von 0.3.0 erledigt.
+     - **Offen für die Abnahme:** Jens prüft den Diagnose-Download.
 5. **0.5.0 Brenner-Statistik und Energie:** `burner.py`, Tageswerte mit Restore, Energie- und Pelletsensor mit Optionen.
    - Abnahme: Tests der Grenzfälle grün. Das Vergleichsskript gegen den Pellet-Monitor über 3 Tage in der Testinstanz erfüllt die Toleranzen.
 6. **0.6.0 Echtbetrieb:** Release über GitHub, Installation über den Marketplace an der echten HA. Energie-Dashboard und Push-Automation für Störungen eingerichtet.

@@ -203,3 +203,21 @@ async def test_parallel_calls_are_serialized(
     )
     assert boiler.peak == 1
     assert len(boiler.sent) == 3
+
+
+@pytest.mark.parametrize(
+    ("body", "expected"),
+    [
+        (b"Oekofen JSON Interface   V4.00\nusage: ...", "V4.00"),
+        (b"Oekofen JSON Interface   4.04b\n", "4.04b"),
+        (b"something else", None),
+    ],
+)
+async def test_firmware_from_help_page(
+    session: aiohttp.ClientSession,
+    boiler: FakeBoiler,
+    body: bytes,
+    expected: str | None,
+) -> None:
+    boiler.queue(f"{BASE}/help", body)
+    assert await make_client(session).async_get_firmware() == expected

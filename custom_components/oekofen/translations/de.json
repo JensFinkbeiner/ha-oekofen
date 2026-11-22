@@ -95,6 +95,9 @@
       },
       "pump": {
         "name": "Pumpe"
+      },
+      "fault": {
+        "name": "Störung"
       }
     },
     "sensor": {
@@ -205,6 +208,9 @@
       },
       "circulation_release_temperature": {
         "name": "Freigabetemperatur"
+      },
+      "fault_message": {
+        "name": "Störungsmeldung"
       }
     }
   },
@@ -214,6 +220,12 @@
     },
     "update_failed": {
       "message": "Lesen des Kessels fehlgeschlagen: {error}"
+    }
+  },
+  "issues": {
+    "boiler_fault": {
+      "title": "ÖkoFEN-Kessel meldet eine Störung",
+      "description": "Der Kessel meldet: {fault} (Code {code}, insgesamt {count} Meldung(en)).\n\nPrüfe den Kessel und quittiere die Störung am Touch. Dieser Hinweis verschwindet, sobald der Kessel die Störung nicht mehr meldet."
     }
   }
 }

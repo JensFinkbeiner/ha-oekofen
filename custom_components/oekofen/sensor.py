@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
+from typing import Any
 
 from homeassistant.components.sensor import (
     SensorDeviceClass,
@@ -19,6 +21,7 @@ from homeassistant.const import (
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
+from .api import OekofenData
 from .const import BURNER_PHASES
 from .coordinator import OekofenConfigEntry, OekofenCoordinator
 from .entity import (
@@ -39,6 +42,25 @@ class OekofenSensorEntityDescription(OekofenEntityDescription, SensorEntityDescr
     kind_of_value: str = "number"  # number | enum_phase | text
     # Without a room sensor the boiler sends 0 instead of a sentinel value.
     zero_is_none: bool = False
+    # Values computed from the whole answer instead of one key.
+    data_fn: Callable[[OekofenData], str | int | float | None] | None = None
+    attributes_fn: Callable[[OekofenData], Mapping[str, Any]] | None = None
+
+
+def _fault_text(data: OekofenData) -> str | None:
+    if not data.faults:
+        return None
+    fault = data.faults[0]
+    text = f"{fault.text} [{fault.code}]" if fault.code is not None else fault.text
+    return text[:STATE_TEXT_MAX]
+
+
+def _fault_attributes(data: OekofenData) -> dict[str, Any]:
+    return {
+        "faults": [
+            {"date": f.date, "text": f.text, "code": f.code} for f in data.faults
+        ]
+    }
 
 
 def _temperature(
@@ -114,6 +136,14 @@ SENSORS: tuple[OekofenSensorEntityDescription, ...] = (
         options=sorted(set(BURNER_PHASES.values())),
     ),
     _status("pe"),
+    OekofenSensorEntityDescription(
+        key="fault_message",
+        translation_key="fault_message",
+        kind="system",
+        value_key="L_errors",
+        data_fn=_fault_text,
+        attributes_fn=_fault_attributes,
+    ),
     OekofenSensorEntityDescription(
         key="burner_starts",
         translation_key="burner_starts",
@@ -205,10 +235,33 @@ class OekofenSensor(OekofenEntity, SensorEntity):
     ) -> None:
         """Initialize the sensor."""
         super().__init__(coordinator, section, description)
+        self._last_total: float | None = None
+
+    @property
+    def extra_state_attributes(self) -> Mapping[str, Any] | None:
+        """Return extra attributes (list of faults for the fault sensor)."""
+        if self.entity_description.attributes_fn is None:
+            return None
+        return self.entity_description.attributes_fn(self.coordinator.data)
 
     @property
     def native_value(self) -> str | int | float | None:
         """Return the value in the form Home Assistant expects."""
+        value = self._value()
+        if self.state_class is SensorStateClass.TOTAL_INCREASING and isinstance(
+            value, int | float
+        ):
+            # A counter that goes backwards would be read as a reset by the
+            # statistics; keep the last value instead (e.g. touch panel restart).
+            if self._last_total is not None and value < self._last_total:
+                return self._last_total
+            self._last_total = value
+        return value
+
+    def _value(self) -> str | int | float | None:
+        description = self.entity_description
+        if description.data_fn is not None:
+            return description.data_fn(self.coordinator.data)
         value = self.raw_value
         match self.entity_description.kind_of_value:
             case "enum_phase":

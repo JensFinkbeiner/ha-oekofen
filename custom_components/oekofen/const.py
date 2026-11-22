@@ -18,6 +18,8 @@ DEFAULT_PORT: Final = 4321
 DEFAULT_SCAN_INTERVAL: Final = 60
 MIN_SCAN_INTERVAL: Final = 30
 MAX_SCAN_INTERVAL: Final = 3600
+# Longest interval while the boiler stays unreachable (doubling backoff).
+MAX_BACKOFF: Final = timedelta(minutes=10)
 
 # Factors, units and enum texts rarely change; reload them once a day.
 METADATA_REFRESH: Final = timedelta(hours=24)

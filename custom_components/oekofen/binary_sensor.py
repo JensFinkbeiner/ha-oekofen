@@ -13,7 +13,7 @@ from homeassistant.components.binary_sensor.const import BinarySensorDeviceClass
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
-from .api import Value
+from .api import OekofenData, Value
 from .const import BURNING_STATES
 from .coordinator import OekofenConfigEntry, OekofenCoordinator
 from .entity import (
@@ -46,6 +46,14 @@ class OekofenBinarySensorEntityDescription(
     """Describe an ÖkoFEN binary sensor."""
 
     is_on_fn: Callable[[Value], bool | None] = _is_on
+    # Computed from the whole answer instead of one key.
+    data_fn: Callable[[OekofenData], bool | None] | None = None
+
+
+def _has_fault(data: OekofenData) -> bool:
+    errors = data.get("system", "L_errors")
+    count = errors if isinstance(errors, int) and not isinstance(errors, bool) else 0
+    return bool(data.faults) or count > 0
 
 
 def _pump(kind: str, value_key: str = "L_pump") -> OekofenBinarySensorEntityDescription:
@@ -67,6 +75,14 @@ BINARY_SENSORS: tuple[OekofenBinarySensorEntityDescription, ...] = (
         value_key="L_state",
         device_class=BinarySensorDeviceClass.RUNNING,
         is_on_fn=_is_burning,
+    ),
+    OekofenBinarySensorEntityDescription(
+        key="fault",
+        translation_key="fault",
+        kind="system",
+        value_key="L_errors",
+        device_class=BinarySensorDeviceClass.PROBLEM,
+        data_fn=_has_fault,
     ),
     _pump("hk"),
     _pump("ww"),
@@ -102,4 +118,7 @@ class OekofenBinarySensor(OekofenEntity, BinarySensorEntity):
     @property
     def is_on(self) -> bool | None:
         """Return True if the pump or burner runs."""
-        return self.entity_description.is_on_fn(self.raw_value)
+        description = self.entity_description
+        if description.data_fn is not None:
+            return description.data_fn(self.coordinator.data)
+        return description.is_on_fn(self.raw_value)

@@ -13,8 +13,8 @@ from homeassistant.helpers.entity import Entity, EntityDescription
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .api import OekofenData, Value
-from .const import DEFAULT_TITLE, DOMAIN, MANUFACTURER
-from .coordinator import OekofenConfigEntry, OekofenCoordinator
+from .const import DEFAULT_TITLE, DOMAIN, LOGGER, MANUFACTURER
+from .coordinator import OekofenConfigEntry, OekofenCoordinator, boiler_model
 
 # Section prefix -> translation key of the child device. "pe1" is the main device.
 CHILD_DEVICES: dict[str, str] = {
@@ -56,7 +56,10 @@ def section_device_identifier(
 
 @callback
 def async_register_main_device(
-    hass: HomeAssistant, entry: OekofenConfigEntry, data: OekofenData
+    hass: HomeAssistant,
+    entry: OekofenConfigEntry,
+    data: OekofenData,
+    sw_version: str | None = None,
 ) -> str:
     """Register the controller as main device and return its device id.
 
@@ -69,6 +72,7 @@ def async_register_main_device(
         manufacturer=MANUFACTURER,
         model=boiler_model(data),
         name=DEFAULT_TITLE,
+        sw_version=sw_version,
     )
     return device.id
 
@@ -91,13 +95,33 @@ def device_info(
     )
 
 
-def boiler_model(data: OekofenData) -> str | None:
-    """Return the boiler type from its enum text, e.g. "COMPACT"."""
-    value = data.get(MAIN_BOILER, "L_type")
-    meta = data.field_meta(MAIN_BOILER, "L_type")
-    if isinstance(value, int) and meta and meta.options:
-        return meta.options.get(value)
-    return None
+# Units of the JSON metadata -> unit Home Assistant uses for the same quantity.
+_UNIT_ALIASES = {"°C": "°C", "K": "K", "%": "%", "h": "h", "min": "min", "kg": "kg"}
+
+
+def unit_matches(
+    data: OekofenData, section: str, description: OekofenEntityDescription
+) -> bool:
+    """Return False if the boiler reports a different unit than expected.
+
+    Protects against firmware that e.g. reports a duration in seconds where
+    the description expects minutes. Unknown units are logged, not rejected.
+    """
+    expected = getattr(description, "native_unit_of_measurement", None)
+    meta = data.field_meta(section, description.value_key)
+    if expected is None or meta is None or meta.unit is None:
+        return True
+    reported = _UNIT_ALIASES.get(meta.unit)
+    if reported == expected:
+        return True
+    LOGGER.warning(
+        "Skipping %s.%s: the boiler reports unit %r, expected %r",
+        section,
+        description.value_key,
+        meta.unit,
+        expected,
+    )
+    return False
 
 
 def sections_for_kind(data: OekofenData, kind: str) -> list[str]:
@@ -163,6 +187,9 @@ def async_setup_section_entities[D: OekofenEntityDescription](
             for section in sections_for_kind(data, description.kind):
                 key = (section, description.key)
                 if key in known or description.value_key not in data.sections[section]:
+                    continue
+                if not unit_matches(data, section, description):
+                    known.add(key)
                     continue
                 known.add(key)
                 new.append(factory(coordinator, section, description))

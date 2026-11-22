@@ -4,6 +4,29 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/). Versionssc
 MAJOR wird nur auf ausdrücklichen Wunsch erhöht, MINOR bei neuen Funktionen, PATCH bei Fehlerbehebungen.
 Reine Dokumentation und Refactoring ändern die Version nicht.
 
+## [0.4.0] - 2026-11-22
+
+### Hinzugefügt
+- Störungsmeldung:
+  - Binärsensor „Störung“ (Problem). Er ist an, wenn der Kessel Störungstexte oder einen Fehlerzähler `system.L_errors` > 0 meldet.
+  - Sensor „Störungsmeldung“ mit Text und Code, alle Meldungen im Attribut `faults`.
+  - Reparatur-Hinweis in HA, solange die Störung anliegt. Danach verschwindet er von selbst.
+- Diagnose-Download. Geschwärzt sind Host, Passwort, Namen der Heizkreise und die Wetterquelle. Der Standort wird gar nicht erst gelesen.
+- Robuste Abfrage:
+  - Eine einzelne Kollision mit einem anderen Programm (zum Beispiel dem Pellet-Monitor) behält die letzten Werte.
+  - Bei einem Dauerausfall verdoppelt sich das Intervall bis höchstens 10 Minuten und springt danach zurück.
+- Firmware des Touch als Softwareversion des Geräts, gelesen aus dem Kopf der Hilfeseite (zum Beispiel V4.00b).
+- Das Modell des Kessels wird bei jeder täglichen Aktualisierung der Metadaten nachgezogen.
+
+### Geändert
+- Meldet der Kessel für einen Wert eine andere Einheit als erwartet (zum Beispiel Sekunden statt Minuten), wird die Entität nicht angelegt, mit einer Warnung im Log.
+- Die Zähler (Brennerstarts, Brennerstunden) laufen nie rückwärts. Ein kurzer Rücksprung zählt also nicht als Reset in der Statistik.
+- Der Standort der Wetterquelle wird auch aus den Metadaten entfernt.
+
+### Geprüft
+- 22.11.2026: 97 Tests bestanden (80 Snapshots, darunter die Diagnose), 100 % Branch-Coverage, mypy strict ohne Befund.
+- In der Testinstanz am echten Kessel: 40 Entitäten, Modell COMPACT, Firmware V4.00b, kein Fehler im Log.
+
 ## [0.3.0] - 2026-11-22
 
 ### Hinzugefügt

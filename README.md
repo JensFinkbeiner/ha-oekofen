@@ -2,7 +2,7 @@
 
 Custom Integration für Home Assistant, die ÖkoFEN-Pelletkessel (Pellematic mit Touch-Bedienung) über die **lokale JSON-Schnittstelle** ausliest. Nur lesend, ohne Cloud. Die Daten verlassen das eigene Netz nicht.
 
-> Status: **0.3.0, im Aufbau.** Einrichtung, Geräte, Sensoren und Binärsensoren funktionieren. Störungsmeldung, Brenner-Statistik und Energie folgen. Fahrplan siehe [PLAN.md](PLAN.md).
+> Status: **0.4.0, im Aufbau.** Einrichtung, Geräte, Sensoren, Störungsmeldung und Diagnose funktionieren. Brenner-Statistik und Energie folgen. Fahrplan siehe [PLAN.md](PLAN.md).
 > Privates Projekt ohne Support. Kein offizielles Produkt von ÖkoFEN.
 
 ## Geplanter Umfang (1.0.0)
@@ -50,7 +50,7 @@ Der Regler erscheint als Gerät „ÖkoFEN Pellematic“, Modell laut Kessel, zu
 
 | Gerät | Entitäten (Standard aktiv) | Zusätzlich, standardmäßig deaktiviert |
 |---|---|---|
-| Regler und Kessel | Außentemperatur, Kesseltemperatur, Kessel-Soll, Feuerraumtemperatur, Modulation, Brennerphase, Status, Brenner (an/aus). Diagnose: Brennerstarts, Brennerstunden, mittlere Laufzeit | Temperatur und Bewölkung vom Wetterdienst, Feuerraum-Soll, externer Kesselfühler, Saugzuggebläse, Verbrennungsluft, Kesselpumpe |
+| Regler und Kessel | Außentemperatur, Kesseltemperatur, Kessel-Soll, Feuerraumtemperatur, Modulation, Brennerphase, Status, Brenner (an/aus), Störung (an/aus), Störungsmeldung. Diagnose: Brennerstarts, Brennerstunden, mittlere Laufzeit | Temperatur und Bewölkung vom Wetterdienst, Feuerraum-Soll, externer Kesselfühler, Saugzuggebläse, Verbrennungsluft, Kesselpumpe |
 | Heizkreis | Vorlauf, Vorlauf-Soll, Status, Pumpe | Raumtemperatur und Raum-Soll (nur mit Raumfühler sinnvoll) |
 | Puffer | Temperatur oben, Temperatur Mitte, Pufferpumpe (%), Status | Solltemperaturen oben und Mitte |
 | Warmwasser | Warmwassertemperatur, Warmwasser-Soll, Status, Pumpe | Warmwassertemperatur unten |
@@ -58,6 +58,32 @@ Der Regler erscheint als Gerät „ÖkoFEN Pellematic“, Modell laut Kessel, zu
 
 - „Brenner“ und „Brennerphase“ kommen aus der Kesselphase. Der Kessel-Wert `L_br` zeigt den Brenner bei der Pellematic Compact nicht zuverlässig an.
 - „Status“ zeigt den Statustext des Kessels in der Sprache, die am Touch eingestellt ist.
+
+## Störungen
+
+Meldet der Kessel eine Störung, passiert dreierlei:
+- „Störung“ geht auf an.
+- „Störungsmeldung“ zeigt Text und Code. Das Attribut `faults` enthält alle Meldungen mit Datum.
+- Unter Einstellungen → Reparaturen erscheint ein Hinweis. Er verschwindet, sobald der Kessel die Störung nicht mehr meldet.
+
+Beispiel-Automation für eine Push-Nachricht aufs Handy:
+
+```yaml
+alias: Pelletheizung Störung melden
+triggers:
+  - trigger: state
+    entity_id: binary_sensor.okofen_pellematic_storung
+    to: "on"
+    for: "00:02:00"
+actions:
+  - action: notify.mobile_app_mein_handy
+    data:
+      title: Pelletheizung
+      message: "Störung: {{ states('sensor.okofen_pellematic_storungsmeldung') }}"
+mode: single
+```
+
+Die Entity-IDs hängen von der Sprache ab, in der die Integration eingerichtet wurde, auf Englisch zum Beispiel `binary_sensor.okofen_pellematic_fault`.
 
 ## Datenabfrage
 
@@ -69,6 +95,30 @@ Eine Anfrage pro Intervall (`all`). Einheiten, Faktoren und Klartexte (`all??`) 
 - Pelletvorrat und -verbrauch misst der Kessel nicht. `L_storage_*` ist ein fester Einstellwert und wird deshalb nicht angeboten.
 - Kein HTTPS: Das JSON-Passwort steht im Klartext in der Anfrage im LAN (Vorgabe von ÖkoFEN).
 - Der Kessel wird nicht automatisch gefunden. Host und Port gibst du selbst ein.
+
+## Unterstützte Geräte
+
+- Getestet: Pellematic Compact (PES 212) mit Touch V4.00b.
+- Sollte funktionieren: ÖkoFEN-Kessel mit Touch-Bedienung ab Firmware V3.10d. Andere Bereiche (Solar, Wärmepumpe, mehrere Kessel) liefern Grundsensoren und sind ungeprüft.
+- Nicht unterstützt: Kessel ohne Touch bzw. ohne JSON-Schnittstelle, das Cloud-Portal my.oekofen.info.
+
+## Fehlersuche
+
+| Problem | Ursache und Lösung |
+|---|---|
+| „Der Kessel ist nicht erreichbar“ | IP oder Port falsch, oder die JSON-Schnittstelle ist aus. Am Touch prüfen: JSON-Modus „Ein“, Port. Läuft ein `curl http://<IP>:<Port>/<Passwort>/all` im LAN? |
+| „Der Kessel hat keine Daten geliefert“ | Falsches JSON-Passwort. Der Kessel liefert dann seine Hilfeseite. |
+| „Kessel ausgelastet“ | Ein anderes Programm fragt den Kessel gerade ab. Ein paar Sekunden warten. Den Abstand der anderen Programme nicht unter 30 s setzen. |
+| Entitäten zeitweise „nicht verfügbar“ | Kessel neu gestartet oder WLAN-Aussetzer. Die Integration fragt dann seltener ab (bis 10 min) und erholt sich von selbst. |
+| Werte fehlen oder sind unplausibel | Diagnose herunterladen (Gerät → ⋮ → Diagnose herunterladen). Zugangsdaten und Namen sind darin geschwärzt. |
+
+Für ausführliche Logs in `configuration.yaml` eintragen:
+
+```yaml
+logger:
+  logs:
+    custom_components.oekofen: debug
+```
 
 ## Entfernen
 

@@ -63,6 +63,8 @@ def mock_client() -> Generator[MagicMock]:
     ):
         instance = client.return_value
         instance.async_get_data = AsyncMock(return_value=load_data())
+        instance.async_get_firmware = AsyncMock(return_value="V4.00")
+        instance.has_metadata = True
         yield instance
 
 

@@ -95,6 +95,9 @@
       },
       "pump": {
         "name": "Pump"
+      },
+      "fault": {
+        "name": "Fault"
       }
     },
     "sensor": {
@@ -205,6 +208,9 @@
       },
       "circulation_release_temperature": {
         "name": "Release temperature"
+      },
+      "fault_message": {
+        "name": "Fault message"
       }
     }
   },
@@ -214,6 +220,12 @@
     },
     "update_failed": {
       "message": "Reading the boiler failed: {error}"
+    }
+  },
+  "issues": {
+    "boiler_fault": {
+      "title": "ÖkoFEN boiler reports a fault",
+      "description": "The boiler reports: {fault} (code {code}, {count} message(s) in total).\n\nCheck the boiler and acknowledge the fault on its touch panel. This message disappears as soon as the boiler no longer reports the fault."
     }
   }
 }

@@ -6,6 +6,7 @@ Read-only on purpose: there is no method that writes to the boiler.
 from __future__ import annotations
 
 import asyncio
+import re
 import time
 from urllib.parse import quote
 
@@ -30,6 +31,10 @@ TIMEOUT = 20.0
 # 22.11.2026). Some US firmware 3.10 reportedly aborts on "??".
 META_PATH = "all??"
 DATA_PATH = "all"
+# Any unknown command returns the help page, whose first line holds the
+# firmware: "Oekofen JSON Interface   V4.00".
+HELP_PATH = "help"
+_FIRMWARE_RE = re.compile(r"Oekofen JSON Interface\s+(V?[0-9][\w.]*)")
 
 
 class OekofenClient:
@@ -82,6 +87,11 @@ class OekofenClient:
             return build_data(raw, meta)
         raw = parse_json(decode_bytes(await self._request(DATA_PATH)))
         return build_data(raw, self._meta)
+
+    async def async_get_firmware(self) -> str | None:
+        """Return the firmware of the touch panel (e.g. "V4.00"), if shown."""
+        match = _FIRMWARE_RE.search(decode_bytes(await self._request(HELP_PATH))[:200])
+        return match.group(1) if match else None
 
     async def _request(self, path: str) -> bytes:
         """Send one GET request, serialized and rate limited, with one busy retry."""

@@ -94,7 +94,7 @@ def parse_meta(data: dict[str, Any]) -> dict[str, dict[str, FieldMeta]]:
             continue
         fields: dict[str, FieldMeta] = {}
         for key, desc in body.items():
-            if not isinstance(desc, dict):
+            if not isinstance(desc, dict) or (section, key) in DROPPED_KEYS:
                 continue
             factor = _number(normalize_scalar(desc.get("factor", 1)))
             unit = desc.get("unit")

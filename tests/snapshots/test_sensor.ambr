@@ -1154,6 +1154,58 @@
     'state': 'unknown',
   })
 # ---
+# name: test_sensors[sensor.okofen_pellematic_fault_message-entry]
+  EntityRegistryEntrySnapshot({
+    'aliases': list([
+      None,
+    ]),
+    'area_id': None,
+    'capabilities': None,
+    'config_entry_id': <ANY>,
+    'config_subentry_id': <ANY>,
+    'device_class': None,
+    'device_id': <ANY>,
+    'disabled_by': None,
+    'domain': 'sensor',
+    'entity_category': None,
+    'entity_id': 'sensor.okofen_pellematic_fault_message',
+    'has_entity_name': True,
+    'hidden_by': None,
+    'icon': None,
+    'id': <ANY>,
+    'labels': set({
+    }),
+    'name': None,
+    'object_id_base': 'Fault message',
+    'options': dict({
+    }),
+    'original_device_class': None,
+    'original_icon': None,
+    'original_name': 'Fault message',
+    'platform': 'oekofen',
+    'previous_unique_id': None,
+    'suggested_object_id': None,
+    'supported_features': 0,
+    'translation_key': 'fault_message',
+    'unique_id': '01TESTENTRY_system_fault_message',
+    'unit_of_measurement': None,
+  })
+# ---
+# name: test_sensors[sensor.okofen_pellematic_fault_message-state]
+  StateSnapshot({
+    'attributes': ReadOnlyDict({
+      'faults': list([
+      ]),
+      <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'ÖkoFEN Pellematic Fault message',
+    }),
+    'context': <ANY>,
+    'entity_id': 'sensor.okofen_pellematic_fault_message',
+    'last_changed': <ANY>,
+    'last_reported': <ANY>,
+    'last_updated': <ANY>,
+    'state': 'unknown',
+  })
+# ---
 # name: test_sensors[sensor.okofen_pellematic_flue_gas_fan-entry]
   EntityRegistryEntrySnapshot({
     'aliases': list([

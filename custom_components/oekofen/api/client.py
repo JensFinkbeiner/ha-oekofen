@@ -21,7 +21,7 @@ TIMEOUT = 20.0
 
 # Metadata answer. The documented form is "all?", but yarl (used by aiohttp)
 # drops an empty query, so "all?" would be sent as "all". "all??" keeps the
-# question mark and returns the same answer (checked on firmware 4.x,
+# question mark and returns the same answer (checked on Touch V4.00b,
 # 22.11.2026). Some US firmware 3.10 reportedly aborts on "??".
 META_PATH = "all??"
 DATA_PATH = "all"

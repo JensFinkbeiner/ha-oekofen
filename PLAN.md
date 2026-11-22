@@ -35,7 +35,7 @@ Nur Jens, an der eigenen Home-Assistant-Instanz (HA OS 2026.11.1, VM 100 auf dem
 | Zirkulation 1 | `circ1` | Key heißt `L_pummp` (Tippfehler der Firmware) |
 | System, Wetter | `system`, `weather` | `weather.L_location` wird verworfen (Datenschutz) |
 | Pelletlager | `pe1.L_storage_*` | Nicht verwendbar: fester Einstellwert, der Kessel misst keinen Verbrauch |
-| Firmware | – | Vermutlich 4.x, weil die Werte numerisch geliefert werden (Annahme, siehe Offene Fragen) |
+| Firmware | – | Touch V4.00b (abgelesen am Touch unter „Software“, 22.11.2026). Passt zu den numerischen Werten. Älter als V4.02, deshalb tritt der Fehler mit dem fehlenden Anführungszeichen bei `L_statetext` hier nicht auf. Die Reparatur bleibt für spätere Updates drin. |
 
 Die Integration erkennt beim Einrichten, welche Bereiche vorhanden sind (`hk1..6`, `pu1..3`, `ww1..3`, `sk1..6`, `circ1..3`, `pe1..4`), und legt nur dafür Geräte an. Getestet wird nur gegen die eigene Anlage. Weitere Bereiche wie Solar oder Wärmepumpe bekommen Grundsensoren, sind aber ungeprüft.
 
@@ -298,7 +298,7 @@ Remote: GitHub, öffentliches Repository (Name zum Beispiel `ha-oekofen`), Branc
 
 ## Offene Fragen
 
-- **Firmware-Version des Touch:** Steht im Menü oder ergibt sich aus `all?`. Davon hängen Datentypen und Eigenheiten ab. Klärung in 0.2.0 mit den Rohdaten.
+- ~~Firmware-Version des Touch~~ Geklärt am 22.11.2026: Touch V4.00b.
 - **Firmware-Update am Kessel:** Steht eins an? Dann vorher Rohdaten sichern, um die Unterschiede zu sehen.
 - ~~Unbestätigte Angaben aus der Recherche~~ Geklärt am 22.11.2026:
   - HA 2026.11.2 verlangt Python ≥ 3.14.2 (PyPI, bestätigt).

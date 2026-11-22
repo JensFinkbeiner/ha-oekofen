@@ -16,7 +16,7 @@ Custom Integration für Home Assistant, die ÖkoFEN-Pelletkessel (Pellematic mit
 ## Voraussetzungen
 
 - Home Assistant 2026.11 oder neuer.
-- ÖkoFEN-Kessel mit Touch-Bedienung und aktivierter JSON-Schnittstelle:
+- ÖkoFEN-Kessel mit Touch-Bedienung und aktivierter JSON-Schnittstelle. Getestet nur mit einer Pellematic Compact und Touch V4.00b. Andere Firmware-Stände sollten funktionieren, sind aber ungeprüft.
   1. Am Touch: Allgemeine Einstellungen → Netzwerkeinstellungen, nach unten scrollen. Eventuell vorher über das Schloss-Symbol den erweiterten Modus öffnen.
   2. JSON-Modus auf **Ein** stellen, nicht auf „Ein kompatibel“.
   3. Port (meist `4321`) und JSON-Passwort notieren. Das JSON-Passwort ist nicht das Passwort des Webportals.

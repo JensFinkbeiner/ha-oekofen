@@ -264,8 +264,20 @@ Remote: GitHub, öffentliches Repository (Name zum Beispiel `ha-oekofen`), Branc
 
 1. **0.1.0 Projektstart:** Plan, Git und öffentliches GitHub-Repo, CLAUDE.md, CHANGELOG, Gerüst der Integration (lädt ohne Entitäten), CI mit hassfest und HACS-Action, HA-Testinstanz läuft. Die offenen Punkte zu Python 3.14 und dem Testpaket sind geklärt.
    - Abnahme: CI grün, Integration erscheint in der Testinstanz unter „Integration hinzufügen“.
+   - **Abgenommen am 22.11.2026:** CI grün (hassfest, HACS, Tests mit 100 % Coverage). Jens hat die Integration in der Testinstanz eingerichtet.
 2. **0.2.0 Protokoll-Client:** `api/` mit Dekodierung, Reparatur, Typen, Metadaten, Rate-Limit und Maskierung. Rohdaten erfasst und anonymisierte Fixtures erzeugt.
    - Abnahme: 100 % Coverage in `api/`. Ein lokaler Praxistest gegen den echten Kessel liest alle Bereiche ohne Parse-Fehler (Ausgabe nur Anzahl der Werte und Dauer).
+   - Tiefencheck vor dem Start (22.11.2026):
+     - Rohdaten: `tools/capture.py` holt `all`, `all?` und `error` mit 5 s Abstand nach `local/raw/`. Die Zugangsdaten liest es aus dem Config Entry der Testinstanz, Claude sieht sie nicht. `tools/inspect_structure.py` gibt nur Bereiche, Keys, Typen, Faktoren und Einheiten aus, keine Werte.
+     - Unabhängige Prüfung: pytest mit 100 % Branch-Coverage in `api/`, Fixtures aus den echten Antworten anonymisiert (`tools/anonymize.py`) und ein Test gegen Ortsangaben. Dazu `tools/live_check.py` mit dem echten Client gegen den Kessel, Ausgabe nur Anzahl der Werte je Bereich, Dauer und Fehler.
+   - **Abgenommen am 22.11.2026:**
+     - 35 Tests bestanden, 100 % Branch-Coverage, mypy strict ohne Befund.
+     - Praxistest: 7 Bereiche (system, weather, hk1, pu1, ww1, circ1, pe1), 108 Werte, 105 Feldbeschreibungen, keine Parse-Fehler, Antwortzeit 0,6 s.
+   - Befunde am echten Kessel:
+     - Antworten als gültiges JSON. `all` kommt in reinem ASCII, `all?` in Latin-1.
+     - Werte numerisch wie bei Firmware 4.x. Die Firmware-Version selbst steht nicht in der Antwort.
+     - `error` ist derzeit leer.
+     - Wichtig: aiohttp entfernt das `?` von `all?`, deshalb wird `all??` abgefragt (am Kessel geprüft, gleiche Antwort).
 3. **0.3.0 Einrichtung und Grundsensoren:** Config Flow (user, reauth, reconfigure, options), Coordinator, Geräte und Untergeräte, Sensoren und Binärsensoren, Übersetzungen, Icons.
    - Abnahme: Snapshot-Tests grün. In der Testinstanz stimmen die Werte mit der Anzeige am Touch bzw. im Pellet-Monitor überein (Stichprobe von 10 Werten, Jens prüft).
 4. **0.4.0 Störung und Diagnose:** Störungs-Binärsensor, Fehlertext, Repair-Hinweis, Diagnose-Download, robuste Abfrage mit Backoff.

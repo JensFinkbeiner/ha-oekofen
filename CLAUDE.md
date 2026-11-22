@@ -18,10 +18,19 @@ Custom Integration `oekofen` für Home Assistant. Sie liest die eigene ÖkoFEN P
 - `custom_components/oekofen/__init__.py`: Setup und Unload, `OekofenRuntimeData` in `entry.runtime_data`, Typ `OekofenConfigEntry`.
 - `custom_components/oekofen/config_flow.py`: Einrichtung über Host, Port und JSON-Passwort. Ab 0.3.0 kommen Verbindungstest, reauth, reconfigure und Optionen dazu.
 - `custom_components/oekofen/const.py`: Domain, Standardport 4321, Intervalle (Standard 60 s, mindestens 30 s).
-- `custom_components/oekofen/api/`: Protokoll-Client (ab 0.2.0). **Keine HA-Imports**, damit das Paket später als PyPI-Bibliothek herausgelöst werden kann. Einziger Ort mit Netzwerkzugriffen (Egress-Modul).
+- `custom_components/oekofen/api/`: Protokoll-Client. **Keine HA-Imports**, damit das Paket später als PyPI-Bibliothek herausgelöst werden kann.
+  - `client.py`: `OekofenClient`, das einzige Modul mit Netzwerkzugriff (Egress). Metadaten über `META_PATH = "all??"`, weil yarl das `?` von `all?` entfernt. Daten über `all`. Sperre plus 3 s Abstand, eine Wiederholung bei 401. Exceptions mit `from None`, damit die URL mit dem Passwort nie im Traceback steht.
+  - `decode.py`: Dekodierung, JSON-Reparatur, `parse_meta`, `build_data` (Faktoren, Sentinels, V3-Strings), `parse_faults`. `DROPPED_SECTIONS` und `DROPPED_KEYS` regeln den Datenschutz.
+  - `models.py`: `OekofenData` (`get`, `field_meta`, `numbered_sections`), `FieldMeta`, `OekofenFault`.
+  - `exceptions.py`: `OekofenConnectionError`, `OekofenBusyError`, `OekofenAuthError` (Hilfeseite statt JSON), `OekofenParseError`.
+- `tools/`: lokale Skripte. Die Zugangsdaten kommen aus dem Config Entry der Testinstanz (`_conn.py`), Ausgaben enthalten nie Werte.
+  - `capture.py`: Rohdaten nach `local/raw/`.
+  - `inspect_structure.py`: Keys und Typen.
+  - `anonymize.py`: erzeugt `tests/fixtures/`.
+  - `live_check.py`: Praxistest mit dem echten Client, im tools-Container.
 - `custom_components/oekofen/quality_scale.yaml`: Stand der Integration Quality Scale. Bei jedem Meilenstein aktualisieren.
 - `custom_components/oekofen/translations/`: `en.json` und `de.json`. Custom Integrations nutzen kein `strings.json`. Jeder Text steht in beiden Dateien.
-- `tests/`: pytest, Fixtures in `tests/fixtures/` (nur erfundene oder anonymisierte Daten, Host immer `192.0.2.x`).
+- `tests/`: pytest, Fixtures in `tests/fixtures/` (nur erfundene oder anonymisierte Daten, Host immer `192.0.2.x`). `tests/api/` simuliert den Kessel mit `AiohttpClientMocker` und `FakeBoiler`. aioresponses passt nicht zur aiohttp-Version von HA. `test_fixtures_privacy.py` bewacht die Fixtures.
 - `devenv/compose.yaml`: Dienst `ha` (Testinstanz) und `tools` (uv, Python 3.14, venv im Docker-Volume).
 - `.github/workflows/`: `validate.yaml` (hassfest, HACS-Action), `tests.yaml` (Ruff, mypy, pytest).
 - `local/`: echte Kesselantworten und lokale Skripte, steht in `.gitignore`.

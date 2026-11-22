@@ -1,6 +1,6 @@
 [project]
 name = "ha-oekofen"
-version = "0.1.0"
+version = "0.2.0"
 description = "Home Assistant custom integration for ÖkoFEN Pellematic boilers (local JSON interface, read-only)"
 readme = "README.md"
 requires-python = ">=3.14.2"
@@ -11,7 +11,6 @@ dev = [
   # Pins the matching homeassistant version (see its README / const.py).
   "pytest-homeassistant-custom-component==0.13.375",
   "syrupy",
-  "aioresponses",
   "ruff",
   "mypy",
   "pytest-cov",
@@ -26,6 +25,9 @@ asyncio_default_fixture_loop_scope = "function"
 testpaths = ["tests"]
 addopts = "--cov=custom_components.oekofen --cov-report=term-missing"
 
+[tool.coverage.run]
+branch = true
+
 [tool.coverage.report]
 fail_under = 95
 
@@ -35,7 +37,7 @@ line-length = 88
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "UP", "B", "SIM", "RUF", "PL", "ASYNC", "PT", "TC", "D"]
-ignore = ["D203", "D213", "PLR2004", "TC001", "TC002", "TC003"]
+ignore = ["D203", "D213", "PLR0913", "PLR2004", "TC001", "TC002", "TC003"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["custom_components.oekofen"]
@@ -45,6 +47,7 @@ combine-as-imports = true
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["D"]
+"tools/**" = ["D", "E501", "PLR"]
 
 [tool.mypy]
 python_version = "3.14"

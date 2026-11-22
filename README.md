@@ -2,7 +2,7 @@
 
 Custom Integration für Home Assistant, die ÖkoFEN-Pelletkessel (Pellematic mit Touch-Bedienung) über die **lokale JSON-Schnittstelle** ausliest. Nur lesend, ohne Cloud. Die Daten verlassen das eigene Netz nicht.
 
-> Status: **0.1.0, im Aufbau.** Die Integration lässt sich einrichten, liefert aber noch keine Entitäten. Fahrplan siehe [PLAN.md](PLAN.md).
+> Status: **0.2.0, im Aufbau.** Der Protokoll-Client steht und ist am echten Kessel getestet. Die Integration lässt sich einrichten, liefert aber noch keine Entitäten. Fahrplan siehe [PLAN.md](PLAN.md).
 > Privates Projekt ohne Support. Kein offizielles Produkt von ÖkoFEN.
 
 ## Geplanter Umfang (1.0.0)
@@ -57,6 +57,15 @@ Voraussetzungen: Git, VS Code und Rancher Desktop mit der Container-Engine „do
 Die Testinstanz bindet `custom_components/oekofen` schreibgeschützt ein. Nach einer Codeänderung genügt „HA-Testinstanz: Neu starten“. Ihre Konfiguration liegt in `devenv/config/` und wird nicht eingecheckt.
 
 Echte Kesselantworten gehören nur nach `local/`. Dieser Ordner wird nie eingecheckt.
+
+Lokale Werkzeuge in `tools/`: Sie lesen die Zugangsdaten aus der eingerichteten Integration der Testinstanz und geben nie Werte aus.
+
+| Skript | Zweck |
+|---|---|
+| `python -I tools/capture.py` | Rohdaten des Kessels nach `local/raw/` holen |
+| `python -I tools/inspect_structure.py` | Bereiche, Keys und Typen der Rohdaten anzeigen |
+| `python -I tools/anonymize.py` | Test-Fixtures aus den Rohdaten erzeugen |
+| `docker compose -f devenv/compose.yaml run --rm tools uv run python tools/live_check.py` | Praxistest mit dem echten Client |
 
 ## Lizenz
 
